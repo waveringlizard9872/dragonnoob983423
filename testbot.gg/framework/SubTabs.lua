@@ -35,8 +35,8 @@ function Groupbox:AddSubTabs(Names, ActiveIndex, Position, Size, Callback)
     local StripParent = self.Frame;
 
     if (Auto) then
-        StripParent = self:_LayoutHolder("LayoutSubTabs", Layout.TabBarHeight + Layout.SubTabTopPadding, 4);
-        Position    = UDim2FromOffset(10, Layout.SubTabTopPadding);
+        StripParent = self:_LayoutHolder("LayoutSubTabs", Layout.TabBarHeight + Layout.SubTabTopPadding, Layout.ElementGap);
+        Position    = UDim2FromOffset(Layout.ElementInset, Layout.SubTabTopPadding);
         Size        = UDim2FromOffset(240, Layout.TabBarHeight);
     else
         Size = Size or UDim2FromOffset(240, Layout.TabBarHeight);
@@ -135,12 +135,10 @@ function Groupbox:AddSubTabs(Names, ActiveIndex, Position, Size, Callback)
                 SubTabsObject:_UpdatePagesContainerHeight();
             end
         end)
-		
-		local PageLayout = Util.ListLayout(PageFrame, 0);
 
-		local PageTopPad = Util.Frame(PageFrame, "TopPad", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, 4), Theme.Body, Layout.GroupboxContentZ);
-		PageTopPad.BackgroundTransparency = 1;
-		PageTopPad.LayoutOrder             = -999;
+        local PageTopPad = Util.Frame(PageFrame, "TopPad", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, 0), Theme.Body, Layout.GroupboxContentZ);
+        PageTopPad.BackgroundTransparency = 1;
+        PageTopPad.LayoutOrder            = -999;
     end
 
     SubTabsObject:Set(ActiveIndex, true);

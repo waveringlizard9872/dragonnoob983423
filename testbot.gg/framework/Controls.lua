@@ -36,8 +36,8 @@ function Groupbox:AddText(Text, X, Y, Width)
 
     if (Auto) then
         Width  = type(X) == "number" and X or Width or 210;
-        Parent = self:_LayoutHolder(`LayoutText_{Util.CleanName(Text)}`, 14, 4);
-        X      = 31;
+        Parent = self:_LayoutHolder(`LayoutText_{Util.CleanName(Text)}`, 14, Layout.ElementGap);
+        X      = Layout.ElementInset;
         Y      = 0;
     end
 
@@ -78,8 +78,8 @@ function Groupbox:AddCheckbox(Text, X, Y, Checked, ColorBox, Callback)
 
     local Parent = self.Frame;
     if (Auto) then
-        Parent = self:_LayoutHolder(`LayoutCheckbox_{Util.CleanName(Text)}`, 14, 4);
-        X      = X or 31;
+        Parent = self:_LayoutHolder(`LayoutCheckbox_{Util.CleanName(Text)}`, 14, Layout.ElementGap);
+        X      = X or Layout.ElementInset;
         Y      = Y or 0;
     end
 
@@ -158,8 +158,8 @@ function Groupbox:AddDropdown(Text, X, Y, Width, Values, Default, Callback)
     local ElementY = 0;
 
     if (Auto) then
-        Parent   = self:_LayoutHolder(`LayoutDropdown_{Util.CleanName(Text)}`, 33, 5);
-        X        = X or 50;
+        Parent   = self:_LayoutHolder(`LayoutDropdown_{Util.CleanName(Text)}`, 33, Layout.ElementGap);
+        X        = X or Layout.ElementInset;
         Y        = Y or 0;
         Width    = Width or 160;
         ElementY = Y;
@@ -266,8 +266,8 @@ function Groupbox:AddKeyPicker(Text, X, Y, Width, Default, Callback)
     local ElementY = Y;
 
     if (Auto) then
-        Parent   = self:_LayoutHolder(`LayoutKeyPicker_{Util.CleanName(Text)}`, 33, 5);
-        X        = X or 50;
+        Parent   = self:_LayoutHolder(`LayoutKeyPicker_{Util.CleanName(Text)}`, 33, Layout.ElementGap);
+        X        = X or Layout.ElementInset;
         Y        = Y or 0;
         Width    = Width or 160;
         ElementY = Y;
@@ -354,10 +354,10 @@ function Groupbox:AddTextBox(Text, Options)
     local Height   = Options.Height  or 14;
     local Default  = Options.Default or "";
     local Callback = Options.Callback;
-    local Parent   = self:_LayoutHolder(`LayoutTextBox_{Util.CleanName(Name)}`, Height, 5);
+    local Parent   = self:_LayoutHolder(`LayoutTextBox_{Util.CleanName(Name)}`, Height, Layout.ElementGap);
     local Inset    = 6;
 
-    local Control = Util.Frame(Parent, `TextBox_{Util.CleanName(Name)}`, UDim2FromOffset(Options.X or 50, Options.Y or 0), UDim2FromOffset(Width, Height), Theme.DropdownMenu, Layout.GroupboxContentZ);
+    local Control = Util.Frame(Parent, `TextBox_{Util.CleanName(Name)}`, UDim2FromOffset(Options.X or Layout.ElementInset, Options.Y or 0), UDim2FromOffset(Width, Height), Theme.DropdownMenu, Layout.GroupboxContentZ);
     Util.Stroke(Control, Theme.DropdownOutline, 1);
 
     local Input = Util.Create("TextBox", {
@@ -411,11 +411,11 @@ function Groupbox:AddListBox(Text, Options)
     local Height   = Options.Height or 120;
     local Getter   = Options.Values or Options.Getter or function() return { }; end;
     local Callback = Options.Callback;
-    local Parent   = self:_LayoutHolder(`LayoutListBox_{Util.CleanName(Options.Text or "Profiles")}`, Height + (Options.Y or 0), Options.BlankAfter or 5);
+    local Parent   = self:_LayoutHolder(`LayoutListBox_{Util.CleanName(Options.Text or "Profiles")}`, Height + (Options.Y or 0), Options.BlankAfter or Layout.ElementGap);
     local Inset    = 8;
     local RowHeight = 15;
 
-    local Box = Util.Frame(Parent, `ListBox_{Util.CleanName(Options.Text or "Profiles")}`, UDim2FromOffset(Options.X or 50, Options.Y or 0), UDim2FromOffset(Width, Height), Theme.DropdownMenu, Layout.GroupboxContentZ);
+    local Box = Util.Frame(Parent, `ListBox_{Util.CleanName(Options.Text or "Profiles")}`, UDim2FromOffset(Options.X or Layout.ElementInset, Options.Y or 0), UDim2FromOffset(Width, Height), Theme.DropdownMenu, Layout.GroupboxContentZ);
     Util.Stroke(Box, Theme.DropdownOutline, 1);
 
     local Container = Util.Create("ScrollingFrame", {
@@ -502,8 +502,8 @@ function Groupbox:AddSlider(Text, X, Y, Width, Ratio, ValueText, Callback)
 
     local Parent = self.Frame;
     if (Auto) then
-        Parent = self:_LayoutHolder(`LayoutSlider_{Util.CleanName(Text)}`, 28, 4, true);
-        X      = X or 51;
+        Parent = self:_LayoutHolder(`LayoutSlider_{Util.CleanName(Text)}`, 28, Layout.ElementGap, true);
+        X      = X or Layout.ElementInset;
         Y      = Y or 0;
         Width  = Width or 160;
     end
@@ -617,15 +617,15 @@ function Groupbox:AddButton(Text, X, Y, Width, Height, Callback)
 
     local Parent = self.Frame;
     if (Auto) then
-        Parent = self:_LayoutHolder(`LayoutButton_{Util.CleanName(Text)}`, Height or 20, 5);
-        X      = X or 50;
+        Parent = self:_LayoutHolder(`LayoutButton_{Util.CleanName(Text)}`, Height or 20, Layout.ElementGap);
+        X      = X or Layout.ElementInset;
         Y      = Y or 0;
         Width  = Width or 160;
         Height = Height or 20;
     end
 
-    local Control = Util.MakeControl(Parent, `Button_{Util.CleanName(Text)}`, UDim2FromOffset(X, Y), UDim2FromOffset(Width, Height or 20), 118);
-    Util.Label(Control, "Text", Text, UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), Theme.Text, Enum.TextXAlignment.Center, 120);
+    local Control, Inner = Util.MakeButtonControl(Parent, `Button_{Util.CleanName(Text)}`, UDim2FromOffset(X, Y), UDim2FromOffset(Width, Height or 20), 118);
+    Util.Label(Inner, "Text", Text, UDim2FromOffset(0, 1), UDim2.new(1, 0, 1, -1), Theme.White, Enum.TextXAlignment.Center, 120);
 
     local ButtonObject = setmetatable({
         Instance = Control,
@@ -686,8 +686,8 @@ function Groupbox:AddColorPicker(Text, X, Y, Width, Default, Callback)
             Y      = Y or ((self.LastAutoRowOffset or 0) + 4);
             Width  = Width or 14;
         else
-            Parent = self:_LayoutHolder(`LayoutColorPicker_{Util.CleanName(Text)}`, 16, 4);
-            X      = X or 50;
+            Parent = self:_LayoutHolder(`LayoutColorPicker_{Util.CleanName(Text)}`, 16, Layout.ElementGap);
+            X      = X or Layout.ElementInset;
             Y      = Y or 0;
             Width  = Width or 180;
         end

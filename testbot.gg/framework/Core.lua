@@ -45,6 +45,9 @@ local Theme = {
     ControlTop              = Color3.fromRGB(66, 65, 72),
     ControlBottom           = Color3.fromRGB(45, 44, 52),
     ControlOpen             = Color3.fromRGB(72, 70, 78),
+    ButtonOuter             = Color3.fromRGB(18, 18, 24),
+    ButtonTop               = Color3.fromRGB(41, 41, 49),
+    ButtonBottom            = Color3.fromRGB(36, 36, 43),
     DropdownMenu            = Color3.fromRGB(38, 38, 46),
     DropdownOutline         = Color3.fromRGB(14, 13, 0),
     DropdownArrow           = Color3.fromRGB(156, 156, 168),
@@ -138,6 +141,9 @@ local Layout = {
     SubTabTopPadding    = 0,
     GroupboxContentTop  = 6,
     GroupboxContentZ    = 109,
+    ElementGap          = 4,
+    ElementInset        = 6.5,
+    ConfigInset         = 25,
 };
 
 -- Fonts

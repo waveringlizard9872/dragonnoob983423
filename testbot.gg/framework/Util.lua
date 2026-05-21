@@ -230,6 +230,13 @@ local Util = { }; do
         return Control;
     end
 
+    function Util.MakeButtonControl(Parent, Name, Position, Size, ZIndex)
+        local Control = Util.Frame(Parent, Name, Position, Size, Theme.ButtonOuter, ZIndex or 120);
+        local Inner = Util.Frame(Control, "Inner", UDim2FromOffset(1, 1), UDim2.new(1, -2, 1, -2), Theme.ButtonTop, (ZIndex or 120) + 1);
+        Util.Gradient(Inner, Theme.ButtonTop, Theme.ButtonBottom);
+        return Control, Inner;
+    end
+
     function Util.SetDropdownArrow(Icon, Open)
         local Widths  = Open and { 7, 5, 3 } or { 3, 5, 7 };
         local Offsets = Open and { 0, 1, 2 } or { 2, 1, 0 };

@@ -199,7 +199,7 @@ function Tab:AddGroupbox(Title, Position, Size)
     ContentFrame.BackgroundTransparency = 1;
     local ContentLayout = Util.ListLayout(ContentFrame, 0);
 
-    local TopPad = Util.Frame(ContentFrame, "TopPad", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, 4), Theme.Groupbox, Layout.GroupboxContentZ);
+    local TopPad = Util.Frame(ContentFrame, "TopPad", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, 0), Theme.Groupbox, Layout.GroupboxContentZ);
     TopPad.BackgroundTransparency = 1;
     TopPad.LayoutOrder            = -999;
 
@@ -267,8 +267,10 @@ function Tab:AddConfigSystem()
     local Configurations = self:AddRightGroupbox("Configurations", { Height = 190 });
     local Settings       = self:AddRightGroupbox("Settings");
 
-    local ConfigInset = 10;
-    local ConfigWidth = 240;
+    local ProfileInset = Layout.ElementInset;
+    local ProfileWidth = 247;
+    local ConfigInset  = Layout.ConfigInset;
+    local ConfigWidth  = 210;
 
     local NameBox = Configurations:AddTextBox({
         X       = ConfigInset,
@@ -279,11 +281,11 @@ function Tab:AddConfigSystem()
     });
 
     local ConfigList = Profiles:AddListBox({
-        X          = ConfigInset,
-        Y          = 6,
-        Width      = ConfigWidth,
+        X          = ProfileInset,
+        Y          = 0,
+        Width      = ProfileWidth,
         Height     = 300,
-        BlankAfter = 6,
+        BlankAfter = Layout.ElementGap,
         Getter     = function() return Manager:GetConfigs(); end,
         Callback   = function(Name)
             SelectedConfig = Name;
