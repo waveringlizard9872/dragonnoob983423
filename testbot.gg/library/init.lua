@@ -1,7 +1,9 @@
 -- Imports
-local Builder = require(script.Builder);
-local Flags = require(script.Flags);
-local Managers = require(script.Managers);
+local Import = ...;
+
+local Builder = Import("library/Builder.lua");
+local Flags = Import("library/Flags.lua");
+local Managers = Import("library/Managers.lua");
 
 -- Library
 local Framework = { }; do

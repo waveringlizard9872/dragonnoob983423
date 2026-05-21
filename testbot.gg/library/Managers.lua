@@ -1,5 +1,7 @@
 -- Imports
-local Builder = require(script.Parent.Builder);
+local Import = ...;
+
+local Builder = Import("library/Builder.lua");
 
 -- Managers
 local Managers = { }; do

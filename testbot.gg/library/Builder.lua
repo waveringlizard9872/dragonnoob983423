@@ -1,5 +1,7 @@
 -- Imports
-local Flags = require(script.Parent.Flags);
+local Import = ...;
+
+local Flags = Import("library/Flags.lua");
 
 -- Builder
 local Builder = { }; do

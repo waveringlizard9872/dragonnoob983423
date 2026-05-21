@@ -34,6 +34,9 @@ local Flags = { }; do
                 return Flags.Values[Index] and Keybind and Keybind:GetState();
             end
         });
+
+        UIFlags = self.Values;
+        KeybindToggles = self.Keybinds;
     end
 
     function Flags:Get(Index)
