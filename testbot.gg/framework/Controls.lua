@@ -49,12 +49,12 @@ end
 
 local function ParseCheckboxArgs(X, Y, Checked, ColorBox, Callback)
     if (Util.IsManualXY(X, Y)) then
-        return false, X, Y, Checked == true, ColorBox, Callback;
+        return false, X, Y, Checked == true, ColorBox, Callback, nil;
     end
 
     if (type(X) == "table") then
         local Info = X;
-        return true, Info.X, Info.Y, Info.Default == true or Info.Value == true or Info.Checked == true, Info.ColorBox or Info.Color, Info.Callback;
+        return true, Info.X, Info.Y, Info.Default == true or Info.Value == true or Info.Checked == true, Info.ColorBox or Info.Color, Info.Callback, Info.Flag;
     end
 
     local Value = X == true;
@@ -69,12 +69,12 @@ local function ParseCheckboxArgs(X, Y, Checked, ColorBox, Callback)
         Color = Y; Cb = Checked;
     end
 
-    return true, nil, nil, Value, Color, Cb;
+    return true, nil, nil, Value, Color, Cb, nil;
 end
 
 function Groupbox:AddCheckbox(Text, X, Y, Checked, ColorBox, Callback)
-    local Auto;
-    Auto, X, Y, Checked, ColorBox, Callback = ParseCheckboxArgs(X, Y, Checked, ColorBox, Callback);
+    local Auto, Flag;
+    Auto, X, Y, Checked, ColorBox, Callback, Flag = ParseCheckboxArgs(X, Y, Checked, ColorBox, Callback);
 
     local Parent = self.Frame;
     if (Auto) then
@@ -115,7 +115,7 @@ function Groupbox:AddCheckbox(Text, X, Y, Checked, ColorBox, Callback)
 
     if (Auto) then self:_FinishLayout("checkbox"); else self:_ResizeAuto(); end
 
-    return Library:_RegisterOption(self, Text, CheckboxObject, "Checkbox");
+    return Library:_RegisterOption(self, Text, CheckboxObject, "Checkbox", Flag);
 end
 
 function Checkbox:Set(Value, Silent)
@@ -137,20 +137,20 @@ end
 
 local function ParseDropdownArgs(X, Y, Width, Values, Default, Callback)
     if (Util.IsManualXY(X, Y)) then
-        return false, X, Y, Width, Util.ListValueOrEmpty(Values), Default, Callback;
+        return false, X, Y, Width, Util.ListValueOrEmpty(Values), Default, Callback, nil;
     end
 
     if (type(X) == "table") and (X.Values or X.Default or X.Callback or X.Width) then
         local Info = X;
-        return true, Info.X, Info.Y, Info.Width or 160, Util.ListValueOrEmpty(Info.Values), Info.Default, Info.Callback;
+        return true, Info.X, Info.Y, Info.Width or 160, Util.ListValueOrEmpty(Info.Values), Info.Default, Info.Callback, Info.Flag;
     end
 
-    return true, nil, nil, 160, Util.ListValueOrEmpty(X), Y, Width;
+    return true, nil, nil, 160, Util.ListValueOrEmpty(X), Y, Width, nil;
 end
 
 function Groupbox:AddDropdown(Text, X, Y, Width, Values, Default, Callback)
-    local Auto;
-    Auto, X, Y, Width, Values, Default, Callback = ParseDropdownArgs(X, Y, Width, Values, Default, Callback);
+    local Auto, Flag;
+    Auto, X, Y, Width, Values, Default, Callback, Flag = ParseDropdownArgs(X, Y, Width, Values, Default, Callback);
     Values  = Values or { };
     Default = Default or Values[1] or "";
 
@@ -209,7 +209,7 @@ function Groupbox:AddDropdown(Text, X, Y, Width, Values, Default, Callback)
     if (Auto) then self:_FinishLayout("dropdown"); else self:_ResizeAuto(); end
 
     self.Window:_RegisterDropdown(DropdownObject);
-    return Library:_RegisterOption(self, Text, DropdownObject, "Dropdown");
+    return Library:_RegisterOption(self, Text, DropdownObject, "Dropdown", Flag);
 end
 
 function Dropdown:_AddOption(Index, Value)
@@ -250,17 +250,17 @@ function Dropdown:SetOpen(Open)
 end
 
 local function ParseKeyPickerArgs(X, Y, Width, Default, Callback)
-    if (Util.IsManualXY(X, Y)) then return false, X, Y, Width, Default, Callback; end
+    if (Util.IsManualXY(X, Y)) then return false, X, Y, Width, Default, Callback, nil; end
     if (type(X) == "table") then
         local Info = X;
-        return true, Info.X, Info.Y, Info.Width or 160, Info.Default or Info.Value or "None", Info.Callback;
+        return true, Info.X, Info.Y, Info.Width or 160, Info.Default or Info.Value or "None", Info.Callback, Info.Flag;
     end
-    return true, nil, nil, 160, X or "None", Y;
+    return true, nil, nil, 160, X or "None", Y, nil;
 end
 
 function Groupbox:AddKeyPicker(Text, X, Y, Width, Default, Callback)
-    local Auto;
-    Auto, X, Y, Width, Default, Callback = ParseKeyPickerArgs(X, Y, Width, Default, Callback);
+    local Auto, Flag;
+    Auto, X, Y, Width, Default, Callback, Flag = ParseKeyPickerArgs(X, Y, Width, Default, Callback);
 
     local Parent   = self.Frame;
     local ElementY = Y;
@@ -310,7 +310,7 @@ function Groupbox:AddKeyPicker(Text, X, Y, Width, Default, Callback)
 
     if (Auto) then self:_FinishLayout("keypicker"); else self:_ResizeAuto(); end
 
-    return Library:_RegisterOption(self, Text, KeyPickerObject, "KeyPicker");
+    return Library:_RegisterOption(self, Text, KeyPickerObject, "KeyPicker", Flag);
 end
 
 Groupbox.AddKeybind = Groupbox.AddKeyPicker;
@@ -323,17 +323,41 @@ end
 
 function KeyPicker:Get() return self.Value; end
 
+function KeyPicker:Matches(Input)
+    return self.Value ~= "None" and Util.FormatInput(Input) == self.Value;
+end
+
+function KeyPicker:GetState()
+    local Key = self.Value;
+    if (Key == "None") then return false; end
+
+    local Success, KeyCode = pcall(function()
+        return Enum.KeyCode[Key];
+    end)
+
+    if (Success) and (KeyCode) then
+        return UserInputService:IsKeyDown(KeyCode);
+    end
+
+    if (Key == "Mouse 1") then return UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1); end
+    if (Key == "Mouse 2") then return UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2); end
+    if (Key == "Mouse 3") then return UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton3); end
+
+    return false;
+end
+
 function Groupbox:AddTextBox(Text, Options)
     Options = type(Text) == "table" and Text or (type(Options) == "table" and Options or { Text = Text });
 
+    local Name     = Options.Text or "Input";
     local Width    = Options.Width   or 80;
     local Height   = Options.Height  or 14;
     local Default  = Options.Default or "";
     local Callback = Options.Callback;
-    local Parent   = self:_LayoutHolder(`LayoutTextBox_{Util.CleanName(Options.Text or "Input")}`, Height, 5);
+    local Parent   = self:_LayoutHolder(`LayoutTextBox_{Util.CleanName(Name)}`, Height, 5);
     local Inset    = 6;
 
-    local Control = Util.Frame(Parent, `TextBox_{Util.CleanName(Options.Text or "Input")}`, UDim2FromOffset(Options.X or 50, Options.Y or 0), UDim2FromOffset(Width, Height), Theme.DropdownMenu, Layout.GroupboxContentZ);
+    local Control = Util.Frame(Parent, `TextBox_{Util.CleanName(Name)}`, UDim2FromOffset(Options.X or 50, Options.Y or 0), UDim2FromOffset(Width, Height), Theme.DropdownMenu, Layout.GroupboxContentZ);
     Util.Stroke(Control, Theme.DropdownOutline, 1);
 
     local Input = Util.Create("TextBox", {
@@ -365,7 +389,11 @@ function Groupbox:AddTextBox(Text, Options)
     end)
 
     self:_FinishLayout("textbox");
-    return TextBoxObject;
+    if (Options.NoSave) then
+        return TextBoxObject;
+    end
+
+    return Library:_RegisterOption(self, Name, TextBoxObject, "TextBox", Options.Flag);
 end
 
 function TextBox:Set(Value, Silent)
@@ -383,7 +411,7 @@ function Groupbox:AddListBox(Text, Options)
     local Height   = Options.Height or 120;
     local Getter   = Options.Values or Options.Getter or function() return { }; end;
     local Callback = Options.Callback;
-    local Parent   = self:_LayoutHolder(`LayoutListBox_{Util.CleanName(Options.Text or "Profiles")}`, Height, 5);
+    local Parent   = self:_LayoutHolder(`LayoutListBox_{Util.CleanName(Options.Text or "Profiles")}`, Height + (Options.Y or 0), Options.BlankAfter or 5);
     local Inset    = 8;
     local RowHeight = 15;
 
@@ -460,17 +488,17 @@ end
 function ListBox:Get() return self.Value; end
 
 local function ParseSliderArgs(X, Y, Width, Ratio, ValueText, Callback)
-    if (Util.IsManualXY(X, Y)) then return false, X, Y, Width, Ratio, ValueText, Callback; end
+    if (Util.IsManualXY(X, Y)) then return false, X, Y, Width, Ratio, ValueText, Callback, nil; end
     if (type(X) == "table") then
         local Info = X;
-        return true, Info.X, Info.Y, Info.Width or 160, Info.Ratio or Info.Default or 0, Info.Text or Info.ValueText or Info.Value, Info.Callback;
+        return true, Info.X, Info.Y, Info.Width or 160, Info.Ratio or Info.Default or 0, Info.Text or Info.ValueText or Info.Value, Info.Callback, Info.Flag;
     end
-    return true, nil, nil, 160, X or 0, Y, Width;
+    return true, nil, nil, 160, X or 0, Y, Width, nil;
 end
 
 function Groupbox:AddSlider(Text, X, Y, Width, Ratio, ValueText, Callback)
-    local Auto;
-    Auto, X, Y, Width, Ratio, ValueText, Callback = ParseSliderArgs(X, Y, Width, Ratio, ValueText, Callback);
+    local Auto, Flag;
+    Auto, X, Y, Width, Ratio, ValueText, Callback, Flag = ParseSliderArgs(X, Y, Width, Ratio, ValueText, Callback);
 
     local Parent = self.Frame;
     if (Auto) then
@@ -524,7 +552,7 @@ function Groupbox:AddSlider(Text, X, Y, Width, Ratio, ValueText, Callback)
 
     if (Auto) then self:_FinishLayout("slider"); else self:_ResizeAuto(); end
 
-    return Library:_RegisterOption(self, Text, SliderObject, "Slider");
+    return Library:_RegisterOption(self, Text, SliderObject, "Slider", Flag);
 end
 
 function Slider:_CacheNumberScale()

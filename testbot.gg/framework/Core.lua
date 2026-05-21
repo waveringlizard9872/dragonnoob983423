@@ -63,12 +63,20 @@ Library.Theme = Theme;
 Library.Windows = { };
 Library.Options = { };
 Library.Toggles = { };
+Library.Flags = setmetatable({ }, {
+    __index = function(Self, Index)
+        local Flag = Library.Toggles[Index] or Library.Options[Index];
+        return Flag and Flag:Get();
+    end
+});
 Library._ConfigEntries = { };
 Library.ConfigManager = {
     EXTENSION = ".cfg",
     Directory = "Graphite/configs",
+    Autoload = "Graphite/configs/autoload.txt",
     Configs = { },
     CurrentlyLoadedConfig = nil,
+    CurrentData = nil,
 };
 
 -- Cached Globals

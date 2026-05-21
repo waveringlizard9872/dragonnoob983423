@@ -198,12 +198,10 @@ function Tab:AddGroupbox(Title, Position, Size)
     });
     ContentFrame.BackgroundTransparency = 1;
     local ContentLayout = Util.ListLayout(ContentFrame, 0);
-	
-	local ContentLayout = Util.ListLayout(ContentFrame, 0);
 
-	local TopPad = Util.Frame(ContentFrame, "TopPad", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, 4), Theme.Groupbox, Layout.GroupboxContentZ);
-	TopPad.BackgroundTransparency = 1;
-	TopPad.LayoutOrder             = -999;
+    local TopPad = Util.Frame(ContentFrame, "TopPad", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, 4), Theme.Groupbox, Layout.GroupboxContentZ);
+    TopPad.BackgroundTransparency = 1;
+    TopPad.LayoutOrder            = -999;
 
     local GroupboxObject = setmetatable({
         Tab               = self,
@@ -266,36 +264,32 @@ function Tab:AddConfigSystem()
     local SelectedConfig = nil;
 
     local Profiles       = self:AddLeftGroupbox("Profiles");
-    local Configurations = self:AddRightGroupbox("Configurations");
+    local Configurations = self:AddRightGroupbox("Configurations", { Height = 190 });
+    local Settings       = self:AddRightGroupbox("Settings");
 
     local ConfigInset = 10;
     local ConfigWidth = 240;
-
 
     local NameBox = Configurations:AddTextBox({
         X       = ConfigInset,
         Width   = ConfigWidth,
         Height  = 14,
         Default = "default",
+        NoSave  = true,
     });
 
-    -- Top padding for the list — keeps all four sides equal at 10px
-    Profiles:AddBlank(10);
-
-    -- Height = content area (320) - top blank (10) - builtin blank-after (5) - extra bottom blank (5) = 300
     local ConfigList = Profiles:AddListBox({
-        X        = ConfigInset,
-        Width    = ConfigWidth,
-        Height   = 300,
-        Getter   = function() return Manager:GetConfigs(); end,
-        Callback = function(Name)
+        X          = ConfigInset,
+        Y          = 6,
+        Width      = ConfigWidth,
+        Height     = 300,
+        BlankAfter = 6,
+        Getter     = function() return Manager:GetConfigs(); end,
+        Callback   = function(Name)
             SelectedConfig = Name;
             NameBox:Set(Name, true);
         end,
     });
-
-    -- AddListBox already appends a 5px blank; this extra 5 brings total bottom padding to 10
-    Profiles:AddBlank(5);
 
     local function Refresh() ConfigList:Refresh(); end
 
@@ -330,10 +324,19 @@ function Tab:AddConfigSystem()
 
     AddConfigButton("Load", function()
         local Name = SelectedConfig or NameBox:Get();
-        if (Name) and (Name ~= "") then Manager:Load(Name); end
+        if (Name) and (Name ~= "") then
+            Manager:Load(Name);
+            NameBox:Set(Name, true);
+        end
     end)
 
-    AddConfigButton("Reset",  function() Manager:ReloadCurrent(); end)
+    AddConfigButton("Reset", function()
+        local Name = SelectedConfig or (Manager.CurrentlyLoadedConfig and Manager.CurrentlyLoadedConfig.Name);
+        if (Name) and (Name ~= "") then
+            Manager:Load(Name);
+            NameBox:Set(Name, true);
+        end
+    end)
 
     AddConfigButton("Delete", function()
         local Name = SelectedConfig or NameBox:Get();
@@ -344,27 +347,56 @@ function Tab:AddConfigSystem()
         end
     end)
 
-    AddConfigButton("Import", function()
-        if (getclipboard) then
-            local Name = NameBox:Get();
-            Manager:Import(Name, getclipboard());
-            Refresh();
+    AddConfigButton("Set as Autoload", function()
+        local Name = SelectedConfig or NameBox:Get();
+        if (Name) and (Name ~= "") then
+            Manager:SetAutoload(Name);
         end
     end)
 
-    AddConfigButton("Export", function()
-        if (setclipboard) then
-            local Name = SelectedConfig or NameBox:Get();
-            local Data = Manager:Export(Name);
-            if (Data) then setclipboard(Data); end
-        end
-    end)
+    local MenuKey = Settings:AddKeyPicker("Menu Key", {
+        Flag    = "Settings/MenuKey",
+        Default = "End",
+    });
+
+    self.Window:SetMenuKeybind(MenuKey);
+
+    Settings:AddColorPicker("Settings/Accent", {
+        Text     = "Accent",
+        Default  = Theme.Accent,
+        Callback = function(Value)
+            Library:SetThemeColor("Accent", Value);
+        end,
+    });
+
+    Settings:AddColorPicker("Settings/AccentDim", {
+        Text     = "Accent Dim",
+        Default  = Theme.AccentDim,
+        Callback = function(Value)
+            Library:SetThemeColor("AccentDim", Value);
+        end,
+    });
+
+    Settings:AddButton("Unload", {
+        X        = ConfigInset,
+        Width    = ConfigWidth,
+        Height   = 20,
+        Callback = function()
+            self.Window:Destroy();
+        end,
+    });
 
     Refresh();
+    if (Manager:LoadAutoload()) and (Manager.CurrentlyLoadedConfig) then
+        SelectedConfig = Manager.CurrentlyLoadedConfig.Name;
+        NameBox:Set(SelectedConfig, true);
+        ConfigList:Set(SelectedConfig, true);
+    end
 
     return {
         Profiles       = Profiles,
         Configurations = Configurations,
+        Settings       = Settings,
         List           = ConfigList,
         Input          = NameBox,
         Manager        = Manager,

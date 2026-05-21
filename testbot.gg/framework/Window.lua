@@ -5,6 +5,7 @@ return function(Environment)
     local Window           = Environment.Window;
     local Tab              = Environment.Tab;
     local Dropdown         = Environment.Dropdown;
+    local KeyPicker        = Environment.KeyPicker;
     local Button           = Environment.Button;
     local Layout           = Environment.Layout;
     local Util             = Environment.Util;
@@ -108,6 +109,12 @@ function Library.new(Options)
     end)
 
     Self:_ConnectColorPickerDismiss();
+    Self:_Signal(UserInputService.InputBegan, function(Input, GameProcessed)
+        if (GameProcessed) then return; end
+        if (Self.MenuKeybind) and (Self.MenuKeybind:Matches(Input)) then
+            Self:SetVisible(not Self.Root.Visible);
+        end
+    end)
 
     return Self;
 end
@@ -387,5 +394,13 @@ function Window:Destroy()
         Connection:Disconnect();
     end
     if (self.Gui) then self.Gui:Destroy(); end
+end
+
+function Window:SetVisible(Value)
+    self.Root.Visible = Value == true;
+end
+
+function Window:SetMenuKeybind(KeyPicker)
+    self.MenuKeybind = KeyPicker;
 end
 end
