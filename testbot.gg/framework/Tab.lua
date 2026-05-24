@@ -270,6 +270,23 @@ function Tab:AddConfigSystem()
     local ConfigInset = 10;
     local ConfigWidth = 240;
 
+    local function Notify(Text, IsError)
+        self.Window:Notify({
+            Text = Text,
+            Duration = IsError and 4 or 3,
+            CloseOnClick = true,
+        });
+    end
+
+    local function HasName(Name, Action)
+        if (Name) and (Name ~= "") then
+            return true;
+        end
+
+        Notify(`Enter a config name to {Action}.`, true);
+        return false;
+    end
+
     local NameBox = Configurations:AddTextBox({
         X       = ConfigInset,
         Y       = 6,
@@ -305,57 +322,90 @@ function Tab:AddConfigSystem()
 
     AddConfigButton("New", function()
         local Name = NameBox:Get();
-        if (Name) and (Name ~= "") then
-            Manager:Create(Name);
+        if HasName(Name, "create") then
+            local Created = Manager:Create(Name);
+            if (not Created) then
+                Notify(`Failed to create config "{Name}".`, true);
+                return;
+            end
+
             SelectedConfig = Name;
             Refresh();
             ConfigList:Set(Name, true);
+            Notify(`Created config "{Name}".`);
         end
     end)
 
     AddConfigButton("Save", function()
         local Name = NameBox:Get();
-        if (Name) and (Name ~= "") then
-            Manager:Save(Name);
+        if HasName(Name, "save") then
+            if (not Manager:Save(Name)) then
+                Notify(`Failed to save config "{Name}".`, true);
+                return;
+            end
+
             SelectedConfig = Name;
             Refresh();
             ConfigList:Set(Name, true);
+            Notify(`Saved config "{Name}".`);
         end
     end)
 
     AddConfigButton("Load", function()
         local Name = SelectedConfig or NameBox:Get();
-        if (Name) and (Name ~= "") then
-            Manager:Load(Name);
+        if HasName(Name, "load") then
+            if (not Manager:Load(Name)) then
+                Notify(`Failed to load config "{Name}".`, true);
+                return;
+            end
+
             NameBox:Set(Name, true);
+            SelectedConfig = Name;
+            ConfigList:Set(Name, true);
+            Notify(`Loaded config "{Name}".`);
         end
     end)
 
     AddConfigButton("Reset", function()
         local Name = SelectedConfig or (Manager.CurrentlyLoadedConfig and Manager.CurrentlyLoadedConfig.Name);
-        if (Name) and (Name ~= "") then
-            Manager:Load(Name);
+        if HasName(Name, "reset") then
+            if (not Manager:Load(Name)) then
+                Notify(`Failed to reset config "{Name}".`, true);
+                return;
+            end
+
             NameBox:Set(Name, true);
+            SelectedConfig = Name;
+            ConfigList:Set(Name, true);
+            Notify(`Reset config "{Name}".`);
         end
     end)
 
     AddConfigButton("Delete", function()
         local Name = SelectedConfig or NameBox:Get();
-        if (Name) and (Name ~= "") then
-            Manager:Delete(Name);
+        if HasName(Name, "delete") then
+            if (not Manager:Delete(Name)) then
+                Notify(`Failed to delete config "{Name}".`, true);
+                return;
+            end
+
             SelectedConfig = nil;
             Refresh();
+            Notify(`Deleted config "{Name}".`);
         end
     end)
 
     AddConfigButton("Set as Autoload", function()
         local Name = NameBox:Get() or SelectedConfig;
-        if (Name) and (Name ~= "") then
+        if HasName(Name, "set as autoload") then
             if (Manager:SetAutoload(Name)) then
                 SelectedConfig = Name;
                 Refresh();
                 ConfigList:Set(Name, true);
                 NameBox:Set(Name, true);
+                Notify(`Set "{Name}" as autoload.`);
+            else
+                Notify(`Failed to set "{Name}" as autoload.`, true);
             end
         end
     end)
@@ -397,6 +447,7 @@ function Tab:AddConfigSystem()
         SelectedConfig = Manager.CurrentlyLoadedConfig.Name;
         NameBox:Set(SelectedConfig, true);
         ConfigList:Set(SelectedConfig, true);
+        Notify(`Autoloaded config "{SelectedConfig}".`);
     end
 
     return {

@@ -28,39 +28,52 @@ return function(Environment)
     local AssetsFolder     = Environment.AssetsFolder;
 
 -- Window
-local function ResolveLoaderImage()
+local function ResolveLoaderImage(CustomUrl)
     if (not (isfile and writefile and readfile and makefolder and isfolder and getcustomasset)) then
         return "";
     end
 
     local function FetchImage(Url)
-        if (request) then
-            local Response = request({
-                Url = Url,
-                url = Url,
-                Method = "GET",
-                method = "GET",
-            });
-            local Body = Response and (Response.Body or Response.body);
-            if (Body) and (#Body > 0) then
-                return Body;
-            end
-        end
+        local RequestFunction = request
+            or http_request
+            or (syn and syn.request)
+            or (http and http.request);
 
-        if (http_request) then
-            local Response = http_request({
+        if (RequestFunction) then
+            local Response = RequestFunction({
                 Url = Url,
                 url = Url,
                 Method = "GET",
                 method = "GET",
+                FollowRedirects = true,
+                Headers = {
+                    ["Accept"] = "image/jpeg,image/png,*/*",
+                    ["User-Agent"] = "KyaniteLoader",
+                },
             });
             local Body = Response and (Response.Body or Response.body);
             if (Body) and (#Body > 0) then
+                if (Response.Headers) then
+                    local Encoding = Response.Headers["Content-Transfer-Encoding"] or Response.Headers["content-transfer-encoding"];
+                    if (Encoding == "base64") and (base64_decode) then
+                        return base64_decode(Body);
+                    end
+                end
                 return Body;
             end
         end
 
         return game:HttpGet(Url);
+    end
+
+    local function LooksLikeImage(Data)
+        if (type(Data) ~= "string") or (#Data < 1000) then
+            return false;
+        end
+
+        local A, B, C, D = string.byte(Data, 1, 4);
+        return (A == 0xFF and B == 0xD8)
+            or (A == 0x89 and B == 0x50 and C == 0x4E and D == 0x47);
     end
 
     local Success, Result = PCall(function()
@@ -70,6 +83,8 @@ local function ResolveLoaderImage()
         local ImagePath = `{AssetsFolder}/noFilter.jpg`;
         if (not isfile(ImagePath)) or (#readfile(ImagePath) < 1000) then
             local Urls = {
+                CustomUrl,
+                "https://github.com/waveringlizard9872/dragonnoob983423/raw/main/testbot.gg/assets/noFilter.jpg",
                 "https://raw.githubusercontent.com/waveringlizard9872/dragonnoob983423/main/testbot.gg/assets/noFilter.jpg",
                 "https://raw.githubusercontent.com/waveringlizard9872/dragonnoob983423/refs/heads/main/testbot.gg/assets/noFilter.jpg",
                 `{Repository}/assets/noFilter.jpg`,
@@ -77,22 +92,26 @@ local function ResolveLoaderImage()
 
             local ImageData = nil;
             for _, Url in ipairs(Urls) do
+                if (type(Url) ~= "string") or (#Url == 0) then
+                    continue;
+                end
+
                 local FetchSuccess, Data = PCall(function()
                     return FetchImage(Url);
                 end)
 
-                if (FetchSuccess) and (type(Data) == "string") and (#Data > 1000) then
+                if (FetchSuccess) and LooksLikeImage(Data) then
                     ImageData = Data;
                     break;
                 end
             end
 
-            if (ImageData) and (#ImageData > 1000) then
+            if (LooksLikeImage(ImageData)) then
                 writefile(ImagePath, ImageData);
             end
         end
 
-        if (isfile(ImagePath)) and (#readfile(ImagePath) > 1000) then
+        if (isfile(ImagePath)) and LooksLikeImage(readfile(ImagePath)) then
             return getcustomasset(ImagePath);
         end
 
@@ -184,14 +203,14 @@ function Library.loader(Options)
     local GameRow = Util.Frame(GameBox, "Bloxstrike", UDim2FromOffset(6, 8), UDim2.new(1, -12, 0, 36), Theme.Groupbox, 112);
     GameRow.BackgroundTransparency = 1;
 
-    Util.Create("ImageLabel", {
+    local GameIcon = Util.Create("ImageLabel", {
         Name                   = "Icon",
         Parent                 = GameRow,
         Position               = UDim2FromOffset(1, 2),
         Size                   = UDim2FromOffset(30, 30),
         BackgroundTransparency = 1,
         BorderSizePixel        = 0,
-        Image                  = Options.GameImage or ResolveLoaderImage(),
+        Image                  = Options.GameImage or ResolveLoaderImage(Options.GameImageUrl),
         ScaleType              = Enum.ScaleType.Crop,
         ZIndex                 = 113,
     });
@@ -208,6 +227,7 @@ function Library.loader(Options)
         Root = Root,
         ChangeLogs = ChangeLabel,
         SelectedGame = "Bloxstrike",
+        GameIcon = GameIcon,
         StartButton = StartButton,
         _Connections = { },
     };
@@ -610,6 +630,52 @@ function Window:Notify(Text, Options)
     local Hitbox = Util.Button(Frame, "Hitbox", UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), "", 660);
     Hitbox.BackgroundTransparency = 1;
 
+    local HiddenX = -(Width + 8);
+    local FadeObjects = { };
+
+    local function TrackFade(Object)
+        local Properties = { };
+
+        if (Object:IsA("TextLabel") or Object:IsA("TextButton") or Object:IsA("TextBox")) then
+            Properties.TextTransparency = Object.TextTransparency;
+            Properties.BackgroundTransparency = Object.BackgroundTransparency;
+        elseif (Object:IsA("ImageLabel") or Object:IsA("ImageButton")) then
+            Properties.ImageTransparency = Object.ImageTransparency;
+            Properties.BackgroundTransparency = Object.BackgroundTransparency;
+        elseif (Object:IsA("Frame") or Object:IsA("ScrollingFrame")) then
+            Properties.BackgroundTransparency = Object.BackgroundTransparency;
+        elseif (Object:IsA("UIStroke")) then
+            Properties.Transparency = Object.Transparency;
+        end
+
+        if (next(Properties)) then
+            TableInsert(FadeObjects, { Object = Object, Properties = Properties });
+        end
+    end
+
+    TrackFade(Frame);
+    for _, Object in ipairs(Frame:GetDescendants()) do
+        TrackFade(Object);
+    end
+
+    local function SetFade(Hidden)
+        for _, Entry in ipairs(FadeObjects) do
+            for Property, Original in pairs(Entry.Properties) do
+                Entry.Object[Property] = Hidden and 1 or Original;
+            end
+        end
+    end
+
+    local function TweenFade(Hidden, Duration)
+        for _, Entry in ipairs(FadeObjects) do
+            local Goal = { };
+            for Property, Original in pairs(Entry.Properties) do
+                Goal[Property] = Hidden and 1 or Original;
+            end
+            Util.Tween(Entry.Object, Goal, Duration);
+        end
+    end
+
     local Notification = {
         Frame = Frame,
         Label = Label,
@@ -632,10 +698,9 @@ function Window:Notify(Text, Options)
         end
 
         Util.Tween(Frame, {
-            Position = UDim2FromOffset(0, self.TargetY or 0),
-            Size = UDim2FromOffset(0, 0),
-            BackgroundTransparency = 1,
+            Position = UDim2FromOffset(HiddenX, self.TargetY or 0),
         }, 0.18);
+        TweenFade(true, 0.14);
 
         task.delay(0.2, function()
             if (Frame) then Frame:Destroy(); end
@@ -661,12 +726,13 @@ function Window:Notify(Text, Options)
     self:_LayoutNotifications();
 
     Notification.Visible = true;
-    Frame.Position = UDim2FromOffset(0, Notification.TargetY);
-    Frame.Size = UDim2FromOffset(0, 0);
+    Frame.Position = UDim2FromOffset(HiddenX, Notification.TargetY);
+    Frame.Size = UDim2FromOffset(Width, Height);
+    SetFade(true);
     Util.Tween(Frame, {
         Position = UDim2FromOffset(0, Notification.TargetY),
-        Size = UDim2FromOffset(Width, Height),
     }, 0.22);
+    TweenFade(false, 0.18);
 
     if (Duration > 0) then
         task.delay(Duration, function()
