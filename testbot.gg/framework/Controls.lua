@@ -549,12 +549,9 @@ function Groupbox:AddSlider(Text, X, Y, Width, Ratio, ValueText, Callback)
     local FillWidth  = MathMax(1, TrackWidth - 2);
     local Track      = Util.Frame(Holder, "Track", UDim2FromOffset(4, 7), UDim2FromOffset(TrackWidth, 7), Theme.Track, 119);
     Util.Stroke(Track, Theme.DropdownOutline, 1);
-    Util.Gradient(Track, Theme.TrackTop, Theme.TrackBottom);
+    local TrackGradient = Util.Gradient(Track, Theme.TrackTop, Theme.TrackBottom);
     local Fill       = Util.Frame(Track, "Fill", UDim2FromOffset(1, 1), UDim2FromOffset(1, 5), Theme.Accent, 120);
     Util.Gradient(Fill, Theme.Accent, Theme.AccentDim);
-    Util.Line(Holder, "LeftTick", UDim2FromOffset(-3, 10), UDim2FromOffset(5, 1), Theme.TrackEnd, 120);
-    Util.Line(Holder, "RightTickV", UDim2FromOffset(Width + 2, 8), UDim2FromOffset(1, 5), Theme.TrackEnd, 120);
-    Util.Line(Holder, "RightTickH", UDim2FromOffset(Width, 10), UDim2FromOffset(5, 1), Theme.TrackEnd, 120);
     local ValueLabel = Util.Label(Holder, "Value", ValueText == nil and "" or ToString(ValueText), UDim2FromOffset(0, 8), UDim2FromOffset(32, 12), Theme.Text, Enum.TextXAlignment.Center, 130);
     Util.ApplyFont(ValueLabel, Layout.TextSize, true);
 
@@ -574,6 +571,12 @@ function Groupbox:AddSlider(Text, X, Y, Width, Ratio, ValueText, Callback)
     SliderObject:Set(SliderObject.Ratio, nil, true);
 
     local Hitbox = Util.Button(Track, "Hitbox", UDim2FromOffset(0, -8), UDim2.new(1, 0, 1, 16), "", 126);
+    self.Window:_Signal(Hitbox.MouseEnter, function()
+        TrackGradient.Color = ColorSequence.new(Theme.TrackHoverTop, Theme.TrackBottom);
+    end)
+    self.Window:_Signal(Hitbox.MouseLeave, function()
+        TrackGradient.Color = ColorSequence.new(Theme.TrackTop, Theme.TrackBottom);
+    end)
     self.Window:_Signal(Hitbox.InputBegan, function(Input)
         if (self.Window:_IsInputBlockedByPopup(Input)) then return; end
         if (Util.IsDragInput(Input)) then
@@ -783,24 +786,35 @@ function Groupbox:AddColorPicker(Text, X, Y, Width, Default, Callback)
     local Map = Util.Frame(Popup, "ColorMap", UDim2FromOffset(1, 1), UDim2FromOffset(MapSize, MapSize), Theme.White, 545);
     Map.ClipsDescendants = true;
 
-    for Index = 0, 5 do
-        local Segment = Util.Frame(Map, `Hue_{Index}`, UDim2.new(Index / 6, 0, 0, 0), UDim2.new(1 / 6, 1, 1, 0), Theme.White, 546);
-        Util.SideGradient(Segment, Color3FromHSV(Index / 6, 1, 1), Color3FromHSV((Index + 1) / 6, 1, 1));
+    local function ColorMapSequence(Sat, Val)
+        return ColorSequence.new({
+            ColorSequenceKeypoint.new(0.00, Color3FromHSV(0.00, Sat, Val)),
+            ColorSequenceKeypoint.new(0.17, Color3FromHSV(0.17, Sat, Val)),
+            ColorSequenceKeypoint.new(0.33, Color3FromHSV(0.33, Sat, Val)),
+            ColorSequenceKeypoint.new(0.50, Color3FromHSV(0.50, Sat, Val)),
+            ColorSequenceKeypoint.new(0.67, Color3FromHSV(0.67, Sat, Val)),
+            ColorSequenceKeypoint.new(0.83, Color3FromHSV(0.83, Sat, Val)),
+            ColorSequenceKeypoint.new(1.00, Color3FromHSV(1.00, Sat, Val)),
+        });
     end
 
-    local WhiteLayer   = Util.Frame(Map, "White", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0.5, 0), Theme.White, 547);
-    local WhiteGradient = InstanceNew("UIGradient");
-    WhiteGradient.Color        = ColorSequence.new(Theme.White, Theme.White);
-    WhiteGradient.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1) });
-    WhiteGradient.Rotation     = 90;
-    WhiteGradient.Parent       = WhiteLayer;
+    for YIndex = 0, MapSize - 1 do
+        local Sat, Val;
 
-    local BlackLayer   = Util.Frame(Map, "Black", UDim2.new(0, 0, 0.5, 0), UDim2.new(1, 0, 0.5, 0), Color3.new(0, 0, 0), 548);
-    local BlackGradient = InstanceNew("UIGradient");
-    BlackGradient.Color        = ColorSequence.new(Color3.new(0, 0, 0), Color3.new(0, 0, 0));
-    BlackGradient.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(1, 0) });
-    BlackGradient.Rotation     = 90;
-    BlackGradient.Parent       = BlackLayer;
+        if (YIndex <= MapSize / 2) then
+            Sat = YIndex / (MapSize / 2);
+            Val = 1;
+        else
+            Sat = (MapSize / 2) / YIndex;
+            Val = ((MapSize / 2) - YIndex + (MapSize / 2)) / YIndex;
+        end
+
+        local Row = Util.Frame(Map, `Row_{YIndex}`, UDim2FromOffset(0, YIndex), UDim2.new(1, 0, 0, 1), Theme.White, 546);
+        local RowGradient = InstanceNew("UIGradient");
+        RowGradient.Color    = ColorMapSequence(MathClamp(Sat, 0, 1), MathClamp(Val, 0, 1));
+        RowGradient.Rotation = 0;
+        RowGradient.Parent   = Row;
+    end
 
     local Cursor = Util.Frame(Map, "Cursor", UDim2FromOffset(0, 0), UDim2FromOffset(4, 4), Color3.new(0, 0, 0), 550);
     Cursor.AnchorPoint = Vector2New(0.5, 0.5);
@@ -887,7 +901,10 @@ function ColorPicker:_Display(Fire)
     self.Swatch.BackgroundColor3 = self.Value;
     self.SwatchGradient.Color   = ColorSequence.new(self.Value, Color3.new(self.Value.R * 0.65, self.Value.G * 0.65, self.Value.B * 0.65));
 
-    local CursorY = (self.Val >= 0.999) and (self.Sat * 0.5) or (1 / (self.Val + 1));
+    local CursorY = 1 - (self.Val * 0.5);
+    if (self.Val >= 0.999) and (self.Sat < 0.999) then
+        CursorY = self.Sat * 0.5;
+    end
 
     self.Cursor.Position = UDim2FromScale(self.Hue, MathClamp(CursorY, 0, 1));
 

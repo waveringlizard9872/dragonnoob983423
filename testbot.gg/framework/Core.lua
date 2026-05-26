@@ -63,9 +63,9 @@ local Theme = {
     ColorPickerPopupBorder  = Color3.fromRGB(18, 18, 24),
     ColorPickerOuter        = Color3.fromRGB(18, 18, 26),
     Track                   = Color3.fromRGB(18, 18, 24),
-    TrackTop                = Color3.fromRGB(46, 46, 56),
+    TrackTop                = Color3.fromRGB(36, 36, 46),
+    TrackHoverTop           = Color3.fromRGB(46, 46, 56),
     TrackBottom             = Color3.fromRGB(55, 55, 62),
-    TrackEnd                = Color3.fromRGB(105, 105, 112),
     CheckboxOff             = Color3.fromRGB(75, 75, 86),
     White                   = Color3.fromRGB(255, 255, 255),
 };

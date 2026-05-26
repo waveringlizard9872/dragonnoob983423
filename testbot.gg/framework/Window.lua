@@ -133,6 +133,20 @@ local function DecoratePanel(Panel, ZIndex)
     Util.Line(Panel, "Bottom", UDim2.new(0, 1, 1, -2),      UDim2.new(1, -2, 0, 1), Theme.Border, ZIndex + 2);
 end
 
+local function DecorateForm(Form, ZIndex)
+    Form.BackgroundTransparency = 1;
+
+    Util.Frame(Form, "FormBack0", UDim2FromOffset(-6, -10), UDim2.new(1, 12, 1, 16), Theme.Outer, ZIndex);
+    Util.Frame(Form, "FormBack1", UDim2FromOffset(-5, -9),  UDim2.new(1, 10, 1, 14), Theme.OuterLight, ZIndex + 1);
+    Util.Frame(Form, "FormBack2", UDim2FromOffset(-4, -8),  UDim2.new(1, 8, 1, 12),  Theme.BorderSoft, ZIndex + 2);
+    Util.Frame(Form, "FormBack3", UDim2FromOffset(0, -4),   UDim2.new(1, 0, 1, 4),   Theme.OuterLight, ZIndex + 3);
+    Util.Frame(Form, "FormBody",  UDim2FromOffset(1, 1),    UDim2.new(1, -2, 1, -2), Theme.Outer, ZIndex + 4);
+
+    local CaptionShade = Util.Frame(Form, "FormCaptionShade", UDim2FromOffset(1, -3), UDim2.new(1, -2, 0, 25), Theme.OuterDark, ZIndex + 5);
+    Util.Gradient(CaptionShade, Theme.OuterDark, Theme.Outer);
+    Util.Line(Form, "FormAccent", UDim2FromOffset(2, -2), UDim2.new(1, -4, 0, 2), Theme.Accent, ZIndex + 6);
+end
+
 function Library.loader(Options)
     Options = Options or { };
 
@@ -161,7 +175,7 @@ function Library.loader(Options)
     end
 
     local Root = Util.Frame(ScreenGui, "Loader", Options.Position or UDim2.new(0.5, -215, 0.5, -118), Options.Size or UDim2FromOffset(430, 236), Theme.Outer, 100);
-    Util.Stroke(Root, Theme.OuterLight, 1);
+    DecorateForm(Root, 94);
 
     local OuterBlack  = Util.Frame(Root,       "OuterBlack",  UDim2FromOffset(1, 1), UDim2.new(1, -2, 1, -2), Theme.OuterDark, 101);
     local OuterMiddle = Util.Frame(OuterBlack, "OuterMiddle", UDim2FromOffset(2, 2), UDim2.new(1, -4, 1, -4), Theme.FramePadding, 102);
@@ -289,7 +303,7 @@ function Library.new(Options)
     end
 
     local Root = Util.Frame(ScreenGui, "Window", Options.Position or UDim2.new(0.5, -306, 0.5, -207), Options.Size or UDim2FromOffset(612, 414), Theme.Outer, 100);
-    Util.Stroke(Root, Theme.OuterLight, 1);
+    DecorateForm(Root, 94);
 
     local OuterBlack  = Util.Frame(Root,        "OuterBlack",  UDim2FromOffset(1, 1), UDim2.new(1, -2, 1, -2), Theme.OuterDark, 101);
     local OuterMiddle = Util.Frame(OuterBlack,  "OuterMiddle", UDim2FromOffset(2, 2), UDim2.new(1, -4, 1, -4), Theme.FramePadding, 102);
@@ -759,7 +773,7 @@ function Window:Confirm(Options)
 
     local Dialog = Util.Frame(Overlay, "ConfirmDialog", UDim2.new(0.5, -MathFloor(Width / 2), 0.5, -MathFloor(Height / 2)), UDim2FromOffset(Width, Height), Theme.Outer, 710);
     Dialog.ClipsDescendants = false;
-    Util.Stroke(Dialog, Theme.OuterLight, 1);
+    DecorateForm(Dialog, 704);
 
     local OuterBlack = Util.Frame(Dialog, "OuterBlack", UDim2FromOffset(1, 1), UDim2.new(1, -2, 1, -2), Theme.OuterDark, 711);
     local Body       = Util.Frame(OuterBlack, "Body", UDim2FromOffset(3, 3), UDim2.new(1, -6, 1, -6), Theme.FramePadding, 712);
