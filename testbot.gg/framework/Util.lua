@@ -238,7 +238,6 @@ local Util = { }; do
         local Control = Util.Frame(Parent, Name, Position, Size, Theme.ControlOuter, ZIndex or 120);
         local Inner   = Util.Frame(Control, "Inner", UDim2FromOffset(1, 1), UDim2.new(1, -2, 1, -2), Color3.new(1, 1, 1), (ZIndex or 120) + 1);
         Util.Gradient(Inner, Theme.ControlTop, Theme.ControlBottom);
-        Control:SetAttribute("KyaniteControl", true);
         Control:SetAttribute("KyaniteTopColor", Theme.ControlTop);
         Control:SetAttribute("KyaniteBottomColor", Theme.ControlBottom);
         return Control, Inner;
@@ -248,7 +247,6 @@ local Util = { }; do
         local Control = Util.Frame(Parent, Name, Position, Size, Theme.ControlOuter, ZIndex or 120);
         local Inner   = Util.Frame(Control, "Inner", UDim2FromOffset(1, 1), UDim2.new(1, -2, 1, -2), Color3.new(1, 1, 1), (ZIndex or 120) + 1);
         Util.Gradient(Inner, Theme.ButtonTop, Theme.ButtonBottom);
-        Control:SetAttribute("KyaniteControl", true);
         Control:SetAttribute("KyaniteTopColor", Theme.ButtonTop);
         Control:SetAttribute("KyaniteBottomColor", Theme.ButtonBottom);
         return Control, Inner;
@@ -301,17 +299,20 @@ local Util = { }; do
 
     function Util.SetCheckboxVisual(Square, Value)
         local Fill = Square:FindFirstChild("Fill") or Square;
-        local Gradient = Fill:FindFirstChild("CheckedGradient");
+        local Gradient = Fill:FindFirstChild("Gradient");
         if (not Gradient) then
             Gradient       = InstanceNew("UIGradient");
-            Gradient.Name  = "CheckedGradient";
+            Gradient.Name  = "Gradient";
             Gradient.Parent = Fill;
         end
 
-        Gradient.Enabled = Value == true;
-        Gradient.Color   = ColorSequence.new(Theme.Accent, Theme.AccentDim);
-
-        Fill.BackgroundColor3 = Value and Theme.Accent or Theme.CheckboxOff;
+        if (Value == true) then
+            Fill.BackgroundColor3 = Theme.Accent;
+            Gradient.Color       = ColorSequence.new(Theme.Accent, Theme.AccentDim);
+        else
+            Fill.BackgroundColor3 = Theme.CheckboxOff;
+            Gradient.Color       = ColorSequence.new(Theme.CheckboxOff, Color3FromRGB(65, 65, 76));
+        end
     end
 
     function Util.PositionPopup(Window, Popup, Anchor, YOffset)

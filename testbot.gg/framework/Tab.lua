@@ -41,7 +41,7 @@ function Tab:_RelayoutGroupboxes()
     local LeftEntries  = { };
     local RightEntries = { };
 
-    for _, GroupboxObject in self.Groupboxes do
+    for _, GroupboxObject in ipairs(self.Groupboxes) do
         if (not GroupboxObject.Auto) then continue; end
 
         local Height = MathMax(GroupboxObject.MinHeight or 0, GroupboxObject._AutoHeight or GroupboxObject.Frame.Size.Y.Offset);
@@ -70,7 +70,7 @@ function Tab:_RelayoutGroupboxes()
     SetColumnScroll(self.LeftSide,  #LeftEntries);
     SetColumnScroll(self.RightSide, #RightEntries);
 
-    for Index, Entry in LeftEntries do
+    for Index, Entry in ipairs(LeftEntries) do
         Entry.Groupbox.Frame.Parent      = self.LeftSide;
         Entry.Groupbox.Frame.LayoutOrder = Index;
         Entry.Groupbox.Frame.Position    = UDim2FromOffset(0, 0);
@@ -78,7 +78,7 @@ function Tab:_RelayoutGroupboxes()
         TaskDefer(function() Entry.Groupbox:_UpdateContentScroll(); end)
     end
 
-    for Index, Entry in RightEntries do
+    for Index, Entry in ipairs(RightEntries) do
         Entry.Groupbox.Frame.Parent      = self.RightSide;
         Entry.Groupbox.Frame.LayoutOrder = Index;
         Entry.Groupbox.Frame.Position    = UDim2FromOffset(0, 0);
@@ -86,7 +86,7 @@ function Tab:_RelayoutGroupboxes()
         TaskDefer(function() Entry.Groupbox:_UpdateContentScroll(); end)
     end
 
-    for _, GroupboxObject in self.Groupboxes do
+    for _, GroupboxObject in ipairs(self.Groupboxes) do
         GroupboxObject:_UpdateContentScroll();
     end
 end
@@ -131,25 +131,28 @@ function Tab:AddGroupbox(Title, Position, Size)
 
     local Parent = Auto and self.LeftSide or self.Page;
     local Box    = Util.Frame(Parent, `Groupbox_{Util.CleanName(Title)}`, Position, Size, Theme.Groupbox, 108);
+    Box.BackgroundTransparency = 1;
+    Util.Frame(Box, "Fill", UDim2FromOffset(0, 6), UDim2.new(1, 0, 1, -5), Theme.Groupbox, 108);
 
-    Util.Line(Box, "OuterTop",    UDim2FromOffset(0, 4),        UDim2.new(1, 0, 0, 1),  Theme.GroupboxOuterBorder, 110);
-    Util.Line(Box, "OuterLeft",   UDim2FromOffset(0, 4),        UDim2.new(0, 1, 1, -3),  Theme.GroupboxOuterBorder, 110);
-    Util.Line(Box, "OuterRight",  UDim2.new(1, -1, 0, 4),       UDim2.new(0, 1, 1, -3),  Theme.GroupboxOuterBorder, 110);
-    Util.Line(Box, "OuterBottom", UDim2.new(0, 0, 1, -1),       UDim2.new(1, 0, 0, 1),  Theme.GroupboxOuterBorder, 110);
+    Util.Line(Box, "OuterTopLeft",  UDim2FromOffset(0, 4),      UDim2FromOffset(10, 1), Theme.GroupboxOuterBorder, 110);
+    local OuterTopRight = Util.Line(Box, "OuterTopRight", UDim2FromOffset(20, 4), UDim2.new(1, -20, 0, 1), Theme.GroupboxOuterBorder, 110);
+    Util.Line(Box, "OuterLeft",     UDim2FromOffset(-1, 4),     UDim2.new(0, 1, 1, -3), Theme.GroupboxOuterBorder, 110);
+    Util.Line(Box, "OuterRight",    UDim2.new(1, 0, 0, 4),      UDim2.new(0, 1, 1, -3), Theme.GroupboxOuterBorder, 110);
+    Util.Line(Box, "OuterBottom",   UDim2.new(0, 0, 1, 0),      UDim2.new(1, 0, 0, 1), Theme.GroupboxOuterBorder, 110);
 
-    local TitleX         = 10;
+    local TitleX         = 15;
     local TitlePadding   = 1;
-    local TitleTextWidth = MathMax(1, MathCeil(Util.MeasureText(Title, Layout.TextSize)) - 4);
+    local TitleTextWidth = MathMax(1, MathCeil(Util.MeasureText(Title, Layout.TextSize)));
     local TitleWidth     = TitleTextWidth + TitlePadding * 2;
     local RightLineX     = 20 + TitleTextWidth;
 
-    local TopLeft  = Util.Line(Box, "TopLeft",  UDim2FromOffset(1, 5),           UDim2FromOffset(TitleX - 1, 1),                  Theme.Border, 111);
-    local TopRight = Util.Line(Box, "TopRight", UDim2FromOffset(RightLineX, 5),   UDim2.new(1, -(RightLineX + 1), 0, 1),           Theme.Border, 111);
-    Util.Line(Box, "Left",   UDim2FromOffset(1, 5),           UDim2.new(0, 1, 1, -6), Theme.Border, 111);
-    Util.Line(Box, "Right",  UDim2.new(1, -2, 0, 5),          UDim2.new(0, 1, 1, -6), Theme.Border, 111);
-    Util.Line(Box, "Bottom", UDim2.new(0, 1, 1, -2),          UDim2.new(1, -2, 0, 1), Theme.Border, 111);
+    local TopLeft  = Util.Line(Box, "TopLeft",  UDim2FromOffset(0, 5),           UDim2FromOffset(10, 1),                         Theme.Border, 111);
+    local TopRight = Util.Line(Box, "TopRight", UDim2FromOffset(RightLineX, 5),   UDim2.new(1, -RightLineX, 0, 1),                Theme.Border, 111);
+    Util.Line(Box, "Left",   UDim2FromOffset(0, 6),           UDim2.new(0, 1, 1, -6), Theme.Border, 111);
+    Util.Line(Box, "Right",  UDim2.new(1, -1, 0, 6),          UDim2.new(0, 1, 1, -6), Theme.Border, 111);
+    Util.Line(Box, "Bottom", UDim2.new(0, 1, 1, -1),          UDim2.new(1, -2, 0, 1), Theme.Border, 111);
 
-    local TitleBack  = Util.Frame(Box, "TitleBack", UDim2FromOffset(TitleX, -1), UDim2FromOffset(TitleWidth, 12), Theme.Groupbox, 112);
+    local TitleBack  = Util.Frame(Box, "TitleBack", UDim2FromOffset(TitleX, -1), UDim2FromOffset(TitleWidth, 14), Theme.Groupbox, 112);
     local TitleLabel = Util.Label(TitleBack, "Title", Title, UDim2FromOffset(TitlePadding, 0), UDim2FromOffset(TitleTextWidth, 14), Theme.Text, Enum.TextXAlignment.Left, 113);
     Util.ApplyFont(TitleLabel, Layout.TextSize, true);
 
@@ -158,10 +161,12 @@ function Tab:AddGroupbox(Title, Position, Size)
         if (Measured <= 0) then return; end
         local NextTitleWidth = Measured + TitlePadding * 2;
         local NextRightLineX = 20 + Measured;
-        TopLeft.Size        = UDim2FromOffset(TitleX - 1, 1);
+        TopLeft.Size        = UDim2FromOffset(10, 1);
         TopRight.Position   = UDim2FromOffset(NextRightLineX, 5);
-        TopRight.Size       = UDim2.new(1, -(NextRightLineX + 1), 0, 1);
-        TitleBack.Size      = UDim2FromOffset(NextTitleWidth, 12);
+        TopRight.Size       = UDim2.new(1, -NextRightLineX, 0, 1);
+        OuterTopRight.Position = UDim2FromOffset(NextRightLineX, 4);
+        OuterTopRight.Size     = UDim2.new(1, -NextRightLineX, 0, 1);
+        TitleBack.Size      = UDim2FromOffset(NextTitleWidth, 14);
         TitleLabel.Size     = UDim2FromOffset(Measured, 14);
     end
 
@@ -170,7 +175,7 @@ function Tab:AddGroupbox(Title, Position, Size)
 
     local ContentTop  = Layout.GroupboxContentTop;
     local ContentZ    = Layout.GroupboxContentZ;
-    local ContentClip = Util.Frame(Box, "ContentClip", UDim2FromOffset(0, ContentTop), UDim2.new(1, 0, 1, -ContentTop), Theme.Groupbox, ContentZ);
+    local ContentClip = Util.Frame(Box, "ContentClip", UDim2FromOffset(3, ContentTop), UDim2.new(1, -6, 1, -(ContentTop + 6)), Theme.Groupbox, ContentZ);
     ContentClip.BackgroundTransparency = 1;
     ContentClip.ClipsDescendants       = true;
 
@@ -299,13 +304,12 @@ function Tab:AddConfigSystem()
 
     local function Refresh() ConfigList:Refresh(); end
 
-    local function AddConfigButton(Label, Callback, Confirm)
+    local function AddConfigButton(Label, Callback)
         Configurations:AddButton(Label, {
             X        = ConfigInset,
             Width    = ConfigWidth,
             Height   = 20,
             Callback = Callback,
-            Confirm  = Confirm == true,
         });
     end
 
@@ -368,21 +372,26 @@ function Tab:AddConfigSystem()
             ConfigList:Set(Name, true);
             Notify(`Reset config "{Name}".`);
         end
-    end, true)
+    end)
 
     AddConfigButton("Delete", function()
         local Name = SelectedConfig or NameBox:Get();
         if HasName(Name, "delete") then
-            if (not Manager:Delete(Name)) then
-                Notify(`Failed to delete config "{Name}".`, true);
-                return;
-            end
+            self.Window:Confirm({
+                Text = "Are you sure you want to delete the selected profile?",
+                OnConfirm = function()
+                    if (not Manager:Delete(Name)) then
+                        Notify(`Failed to delete config "{Name}".`, true);
+                        return;
+                    end
 
-            SelectedConfig = nil;
-            Refresh();
-            Notify(`Deleted config "{Name}".`);
+                    SelectedConfig = nil;
+                    Refresh();
+                    Notify(`Deleted config "{Name}".`);
+                end,
+            });
         end
-    end, true)
+    end)
 
     AddConfigButton("Set as Autoload", function()
         local Name = NameBox:Get() or SelectedConfig;
@@ -426,7 +435,6 @@ function Tab:AddConfigSystem()
         X        = ConfigInset,
         Width    = ConfigWidth,
         Height   = 20,
-        Confirm  = true,
         Callback = function()
             self.Window:Destroy();
         end,

@@ -90,7 +90,7 @@ function Groupbox:AddCheckbox(Text, X, Y, Checked, ColorBox, Callback)
     local Square = Util.Frame(Row, "Square", UDim2FromOffset(1, 2), UDim2FromOffset(8, 8), Theme.DropdownOutline, 119);
     local SquareFill = Util.Frame(Square, "Fill", UDim2FromOffset(1, 1), UDim2.new(1, -2, 1, -2), Theme.CheckboxOff, 120);
     Util.Gradient(SquareFill, Theme.CheckboxOff, Color3FromRGB(65, 65, 76));
-    local TextLabel = Util.Label(Row, "Text", Text, UDim2FromOffset(20, -1), UDim2FromOffset(ColorBox and 156 or 184, 14), Theme.Text, Enum.TextXAlignment.Left, 119);
+    local TextLabel = Util.Label(Row, "Text", Text, UDim2FromOffset(20, -1), UDim2FromOffset(ColorBox and 154 or 182, 14), Theme.Text, Enum.TextXAlignment.Left, 119);
     local Swatch;
 
     if (ColorBox) then
@@ -113,12 +113,6 @@ function Groupbox:AddCheckbox(Text, X, Y, Checked, ColorBox, Callback)
     CheckboxObject:Set(CheckboxObject.Value, true);
 
     local Hitbox = Util.Button(Row, "Hitbox", UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), "", 125);
-    self.Window:_Signal(Hitbox.MouseEnter, function()
-        if (not CheckboxObject.Value) then SquareFill.BackgroundColor3 = Color3FromRGB(83, 83, 94); end
-    end)
-    self.Window:_Signal(Hitbox.MouseLeave, function()
-        if (not CheckboxObject.Value) then SquareFill.BackgroundColor3 = Theme.CheckboxOff; end
-    end)
     self.Window:_Signal(Hitbox.InputBegan, function(Input)
         if (self.Window:_IsInputBlockedByPopup(Input)) then return; end
         if (Util.IsClickInput(Input)) then CheckboxObject:Set(not CheckboxObject.Value); end
@@ -204,13 +198,15 @@ function Groupbox:AddDropdown(Text, X, Y, Width, Values, Default, Callback)
         Open       = false,
     }, Dropdown);
 
-    for Index, Value in Values do
+    for Index, Value in ipairs(Values) do
         DropdownObject:_AddOption(Index, Value);
     end
 
     local Hitbox = Util.Button(Control, "Hitbox", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, 20), "", 145);
     self.Window:_Signal(Hitbox.MouseEnter, function() Util.SetControlState(Control, "hover"); end)
-    self.Window:_Signal(Hitbox.MouseLeave, function() Util.SetControlState(Control, "normal"); end)
+    self.Window:_Signal(Hitbox.MouseLeave, function()
+        Util.SetControlState(Control, DropdownObject.Open and "hover" or "normal");
+    end)
     self.Window:_Signal(Hitbox.InputBegan, function(Input)
         if (self.Window:_IsInputBlockedByPopup(Input, DropdownObject)) then return; end
         if (Util.IsClickInput(Input)) then DropdownObject:SetOpen(not DropdownObject.Open); end
@@ -483,15 +479,14 @@ function Groupbox:AddListBox(Text, Options)
 end
 
 function ListBox:Refresh()
-    for _, Row in self.Rows do Row:Destroy(); end
+    for _, Row in ipairs(self.Rows) do Row:Destroy(); end
     self.Rows = { };
 
     local Values    = type(self.Getter) == "function" and self.Getter() or self.Getter;
-    Values = Values or { };
     local RowHeight = self.RowHeight or 15;
     local Y         = 0;
 
-    for _, Value in Values do
+    for _, Value in ipairs(Values or { }) do
         local Name = ToString(Value);
         local Row  = Util.Button(self.Container, `Option_{Util.CleanName(Name)}`, UDim2FromOffset(0, Y), UDim2.new(1, 0, 0, RowHeight), Name, Layout.GroupboxContentZ + 3);
         Row.BackgroundTransparency = 0;
@@ -515,7 +510,7 @@ end
 
 function ListBox:Set(Value, Silent)
     self.Value = ToString(Value or "");
-    for _, Row in self.Rows do
+    for _, Row in ipairs(self.Rows) do
         Row.TextColor3       = (Row.Text == self.Value) and Theme.Accent or Theme.Text;
         Row.BackgroundColor3 = Theme.DropdownMenu;
     end
@@ -652,17 +647,17 @@ end
 function Slider:Get() return self.Ratio; end
 
 local function ParseButtonArgs(X, Y, Width, Height, Callback)
-    if (Util.IsManualXY(X, Y)) then return false, X, Y, Width, Height, Callback, nil, nil; end
+    if (Util.IsManualXY(X, Y)) then return false, X, Y, Width, Height, Callback; end
     if (type(X) == "table") then
         local Info = X;
-        return true, Info.X, Info.Y, Info.Width or 160, Info.Height or 24, Info.Callback or Info.Func, Info.Confirm == true or Info.DoubleClick == true, Info.ConfirmText;
+        return true, Info.X, Info.Y, Info.Width or 160, Info.Height or 24, Info.Callback or Info.Func;
     end
-    return true, nil, nil, 160, 24, X, nil, nil;
+    return true, nil, nil, 160, 24, X;
 end
 
 function Groupbox:AddButton(Text, X, Y, Width, Height, Callback)
-    local Auto, Confirm, ConfirmText;
-    Auto, X, Y, Width, Height, Callback, Confirm, ConfirmText = ParseButtonArgs(X, Y, Width, Height, Callback);
+    local Auto;
+    Auto, X, Y, Width, Height, Callback = ParseButtonArgs(X, Y, Width, Height, Callback);
 
     local Parent = self.Frame;
     if (Auto) then
@@ -674,16 +669,11 @@ function Groupbox:AddButton(Text, X, Y, Width, Height, Callback)
     end
 
     local Control = Util.MakeButtonControl(Parent, `Button_{Util.CleanName(Text)}`, UDim2FromOffset(X, Y), UDim2FromOffset(Width, Height or 24), 118);
-    local ButtonLabel = Util.Label(Control, "Text", Text, UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), Theme.Text, Enum.TextXAlignment.Center, 120);
+    Util.Label(Control, "Text", Text, UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), Theme.Text, Enum.TextXAlignment.Center, 120);
 
     local ButtonObject = setmetatable({
         Instance = Control,
-        Label    = ButtonLabel,
-        Text     = Text,
         Callback = Callback,
-        Confirm  = Confirm == true,
-        ConfirmText = ConfirmText or "Are you sure?",
-        Confirming  = false,
     }, Button);
 
     local Hitbox = Util.Button(Control, "Hitbox", UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), "", 125);
@@ -699,25 +689,13 @@ function Groupbox:AddButton(Text, X, Y, Width, Height, Callback)
     self.Window:_Signal(Hitbox.InputBegan, function(Input)
         if (self.Window:_IsInputBlockedByPopup(Input)) then return; end
         if (Util.IsClickInput(Input)) then
-            if (ButtonObject.Confirm) and (not ButtonObject.Confirming) then
-                ButtonObject.Confirming = true;
-                ButtonObject.Label.Text = ButtonObject.ConfirmText;
-                task.delay(0.85, function()
-                    if (ButtonObject.Confirming) and (ButtonObject.Label) and (ButtonObject.Label.Parent) then
-                        ButtonObject.Confirming = false;
-                        ButtonObject.Label.Text = ButtonObject.Text;
-                    end
-                end)
-                return;
-            end
-
-            ButtonObject.Confirming = false;
-            ButtonObject.Label.Text = ButtonObject.Text;
             Util.SetControlState(Control, "pressed");
             ButtonObject:Press();
             task.delay(0.08, function()
-                if (Control) and (Control.Parent) then Util.SetControlState(Control, Hovering and "hover" or "normal"); end
-            end);
+                if (Control) and (Control.Parent) then
+                    Util.SetControlState(Control, Hovering and "hover" or "normal");
+                end
+            end)
         end
     end)
 
@@ -909,10 +887,7 @@ function ColorPicker:_Display(Fire)
     self.Swatch.BackgroundColor3 = self.Value;
     self.SwatchGradient.Color   = ColorSequence.new(self.Value, Color3.new(self.Value.R * 0.65, self.Value.G * 0.65, self.Value.B * 0.65));
 
-    local CursorY = 1 - (self.Val * 0.5);
-    if (self.Val >= 0.999) and (self.Sat < 0.999) then
-        CursorY = self.Sat * 0.5;
-    end
+    local CursorY = (self.Val >= 0.999) and (self.Sat * 0.5) or (1 / (self.Val + 1));
 
     self.Cursor.Position = UDim2FromScale(self.Hue, MathClamp(CursorY, 0, 1));
 

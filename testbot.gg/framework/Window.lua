@@ -91,7 +91,7 @@ local function ResolveLoaderImage(CustomUrl)
             };
 
             local ImageData = nil;
-            for _, Url in Urls do
+            for _, Url in ipairs(Urls) do
                 if (type(Url) ~= "string") or (#Url == 0) then
                     continue;
                 end
@@ -468,7 +468,7 @@ function Window:_LayoutTabs()
     local BaseWidth = MathFloor(TotalWidth / Count);
     local X = 1;
 
-    for Index, Name in self.TabOrder do
+    for Index, Name in ipairs(self.TabOrder) do
         local ThisTab = self.Tabs[Name];
         local Width   = (Index == Count and TotalWidth - (X - 1)) or BaseWidth;
         ThisTab.Frame.Position = UDim2FromOffset(X, 1);
@@ -522,7 +522,7 @@ function Window:_RegisterDropdown(Dropdown)
 end
 
 function Window:_CloseColorPickers(Except)
-    for _, Picker in self.ColorPickers do
+    for _, Picker in ipairs(self.ColorPickers) do
         if (Picker ~= Except) and (Picker.Open) then
             Picker:SetOpen(false, true);
         end
@@ -543,7 +543,7 @@ function Window:_ConnectColorPickerDismiss()
 
     self:_Signal(UserInputService.InputChanged, function(Input)
         if (Input.UserInputType ~= Enum.UserInputType.MouseWheel) then return; end
-        for _, Picker in self.ColorPickers do
+        for _, Picker in ipairs(self.ColorPickers) do
             if (Picker.Open) then
                 self:_CloseColorPickers(nil);
                 return;
@@ -555,7 +555,7 @@ end
 function Window:_CloseColorPickersOnRow(Row, Except)
     if (not Row) then return; end
     local RowId = Row:GetAttribute("KyaniteRowId");
-    for _, Picker in self.ColorPickers do
+    for _, Picker in ipairs(self.ColorPickers) do
         if (Picker ~= Except) and (Picker.Open) then
             local SameRow = Picker.Row == Row;
             if (not SameRow) and (RowId) and (Picker.RowId == RowId) then
@@ -654,22 +654,22 @@ function Window:Notify(Text, Options)
     end
 
     TrackFade(Frame);
-    for _, Object in Frame:GetDescendants() do
+    for _, Object in ipairs(Frame:GetDescendants()) do
         TrackFade(Object);
     end
 
     local function SetFade(Hidden)
-        for _, Entry in FadeObjects do
-            for Property, Original in Entry.Properties do
+        for _, Entry in ipairs(FadeObjects) do
+            for Property, Original in pairs(Entry.Properties) do
                 Entry.Object[Property] = Hidden and 1 or Original;
             end
         end
     end
 
     local function TweenFade(Hidden, Duration)
-        for _, Entry in FadeObjects do
+        for _, Entry in ipairs(FadeObjects) do
             local Goal = { };
-            for Property, Original in Entry.Properties do
+            for Property, Original in pairs(Entry.Properties) do
                 Goal[Property] = Hidden and 1 or Original;
             end
             Util.Tween(Entry.Object, Goal, Duration);
@@ -741,6 +741,83 @@ function Window:Notify(Text, Options)
     end
 
     return Notification;
+end
+
+function Window:Confirm(Options)
+    Options = type(Options) == "table" and Options or { Text = ToString(Options or "") };
+
+    local Message   = ToString(Options.Text or Options.Message or "Are you sure?");
+    local OnConfirm = Options.Callback or Options.OnConfirm;
+    local OnCancel  = Options.OnCancel;
+    local Width     = Options.Width or 292;
+    local Height    = Options.Height or 96;
+    local WindowObject = self;
+
+    local Overlay = Util.Frame(self.PopupLayer, "ConfirmOverlay", UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), Theme.Body, 700);
+    Overlay.BackgroundTransparency = 1;
+    Overlay.Active = true;
+
+    local Dialog = Util.Frame(Overlay, "ConfirmDialog", UDim2.new(0.5, -MathFloor(Width / 2), 0.5, -MathFloor(Height / 2)), UDim2FromOffset(Width, Height), Theme.Outer, 710);
+    Dialog.ClipsDescendants = false;
+    Util.Stroke(Dialog, Theme.OuterLight, 1);
+
+    local OuterBlack = Util.Frame(Dialog, "OuterBlack", UDim2FromOffset(1, 1), UDim2.new(1, -2, 1, -2), Theme.OuterDark, 711);
+    local Body       = Util.Frame(OuterBlack, "Body", UDim2FromOffset(3, 3), UDim2.new(1, -6, 1, -6), Theme.FramePadding, 712);
+    Util.Stroke(Body, Theme.BorderSoft, 1);
+    Util.Line(Body, "TopAccent", UDim2FromOffset(1, 0), UDim2.new(1, -2, 0, 1), Theme.Accent, 714);
+
+    local Label = Util.Label(Body, "Message", Message, UDim2FromOffset(12, 31), UDim2.new(1, -24, 0, 16), Theme.Text, Enum.TextXAlignment.Left, 715);
+    Label.TextWrapped = true;
+
+    local Closed = false;
+    local DialogObject = { Frame = Dialog, Overlay = Overlay };
+
+    local function Close(Result)
+        if (Closed) then return; end
+        Closed = true;
+
+        if (Result == true) then
+            Util.SafeCallback(OnConfirm, DialogObject);
+        else
+            Util.SafeCallback(OnCancel, DialogObject);
+        end
+
+        if (Overlay) then Overlay:Destroy(); end
+        WindowObject:_RefreshPopupBlocker();
+    end
+
+    local function AddButton(Name, Text, X, Callback)
+        local Control = Util.MakeButtonControl(Body, Name, UDim2FromOffset(X, Height - 44), UDim2FromOffset(60, 24), 716);
+        Util.Label(Control, "Text", Text, UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), Theme.Text, Enum.TextXAlignment.Center, 718);
+
+        local Hitbox = Util.Button(Control, "Hitbox", UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), "", 720);
+        local Hovering = false;
+
+        WindowObject:_Signal(Hitbox.MouseEnter, function()
+            Hovering = true;
+            Util.SetControlState(Control, "hover");
+        end)
+        WindowObject:_Signal(Hitbox.MouseLeave, function()
+            Hovering = false;
+            Util.SetControlState(Control, "normal");
+        end)
+        WindowObject:_Signal(Hitbox.InputBegan, function(Input)
+            if (not Util.IsClickInput(Input)) then return; end
+            Util.SetControlState(Control, "pressed");
+            task.delay(0.06, function()
+                if (Control) and (Control.Parent) then
+                    Util.SetControlState(Control, Hovering and "hover" or "normal");
+                end
+            end)
+            Callback();
+        end)
+    end
+
+    AddButton("Yes", Options.YesText or "Yes", Width - 148, function() Close(true); end);
+    AddButton("No", Options.NoText or "No", Width - 76, function() Close(false); end);
+
+    DialogObject.Close = Close;
+    return DialogObject;
 end
 
 function Window:AddTab(Name)
@@ -827,8 +904,8 @@ function Window:AddTab(Name)
     self:_Signal(LeftLayout:GetPropertyChangedSignal("AbsoluteContentSize"),  function() UpdateColumnCanvas(LeftSide,  LeftLayout);  end)
     self:_Signal(RightLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function() UpdateColumnCanvas(RightSide, RightLayout); end)
 
-    self:_Signal(LeftSide:GetPropertyChangedSignal("CanvasPosition"),  function() self.Window:_CloseColorPickersInColumn(LeftSide);  end)
-    self:_Signal(RightSide:GetPropertyChangedSignal("CanvasPosition"), function() self.Window:_CloseColorPickersInColumn(RightSide); end)
+    self:_Signal(LeftSide:GetPropertyChangedSignal("CanvasPosition"),  function() self:_CloseColorPickersInColumn(LeftSide);  end)
+    self:_Signal(RightSide:GetPropertyChangedSignal("CanvasPosition"), function() self:_CloseColorPickersInColumn(RightSide); end)
 
     TaskDefer(function()
         UpdateColumnCanvas(LeftSide,  LeftLayout);
@@ -875,7 +952,7 @@ function Window:SetTab(Name, Instant)
     self:_CloseDropdown(nil);
     self:_CloseColorPickers(nil);
 
-    for TabName, ThisTab in self.Tabs do
+    for TabName, ThisTab in pairs(self.Tabs) do
         local Active = TabName == Name;
         ThisTab.Page.Visible = Active;
 

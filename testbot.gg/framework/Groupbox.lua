@@ -17,7 +17,7 @@ function Groupbox:_GetContentHeight()
     if (LayoutHeight > 0) then return LayoutHeight; end
 
     local ContentHeight = 0;
-    for _, Child in self.Content:GetChildren() do
+    for _, Child in ipairs(self.Content:GetChildren()) do
         if (Child:IsA("GuiObject")) and (Child.Visible) and (not Child:IsA("UIListLayout")) then
             ContentHeight = ContentHeight + Child.Size.Y.Offset;
         end
@@ -46,7 +46,7 @@ function Groupbox:_ConnectContentWheel()
         if (not Clip) or (not Clip.Visible) then return; end
         if (not Util.IsPointInside(Clip, Input.Position)) then return; end
 
-        for _, Picker in self.Window.ColorPickers do
+        for _, Picker in ipairs(self.Window.ColorPickers) do
             if (Picker.Open) then
                 self.Window:_CloseColorPickers(nil);
                 return;
@@ -98,7 +98,7 @@ end
 
 function Groupbox:_ResizeAuto()
     local ContentHeight = self:_GetContentHeight();
-    local NaturalHeight = MathMax(self.MinHeight or 0, Layout.GroupboxContentTop + ContentHeight + 2);
+    local NaturalHeight = MathMax(self.MinHeight or 0, Layout.GroupboxContentTop + ContentHeight + 6);
     self._AutoHeight    = NaturalHeight;
 
     if (not self.Auto) then

@@ -58,7 +58,7 @@ function Groupbox:AddSubTabs(Names, ActiveIndex, Position, Size, Callback)
     local Count     = #Names;
     local BaseWidth = MathFloor(Size.X.Offset / Count);
 
-    for Index, Name in Names do
+    for Index, Name in ipairs(Names) do
         local Width     = (Index == Count and Size.X.Offset - (Index - 1) * BaseWidth) or BaseWidth;
         local ItemFrame = Util.Frame(Holder, `SubTab_{Util.CleanName(Name)}`,
             UDim2FromOffset((Index - 1) * BaseWidth + 1, 1),
@@ -112,7 +112,7 @@ function Groupbox:AddSubTabs(Names, ActiveIndex, Position, Size, Callback)
 
     SubTabsObject.PagesContainer = PagesContainer;
 
-    for Index, Name in Names do
+    for Index, Name in ipairs(Names) do
         local PageFrame = Util.Frame(PagesContainer, `Page_{Util.CleanName(Name)}`, UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, 0), Theme.Body, Layout.GroupboxContentZ);
         PageFrame.BackgroundTransparency = 1;
         PageFrame.Visible                = false;
@@ -161,7 +161,7 @@ function SubTabs:_UpdatePagesContainerHeight()
     local Height = MathMax(0, ActivePage.ContentLayout.AbsoluteContentSize.Y);
     self.PagesContainer.Size = UDim2.new(self.PagesContainer.Size.X.Scale, self.PagesContainer.Size.X.Offset, 0, Height);
 
-    for _, Page in self.Pages do
+    for _, Page in ipairs(self.Pages) do
         Page.Frame.Size = UDim2.new(1, 0, 0, Height);
     end
 
@@ -175,7 +175,7 @@ function SubTabs:Set(Index, Instant)
     local PreviousIndex = self.ActiveIndex;
     self.ActiveIndex    = Index;
 
-    for ItemIndex, Item in self.Items do
+    for ItemIndex, Item in ipairs(self.Items) do
         local Active = ItemIndex == Index;
         if (Item.Page) then Item.Page.Frame.Visible = Active; end
 

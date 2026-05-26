@@ -28,23 +28,23 @@ local Theme = {
     WorkspaceBorder         = Color3.fromRGB(39, 39, 47),
     FramePadding            = Color3.fromRGB(23, 23, 30),
     BodyDark                = Color3.fromRGB(6, 6, 9),
-    Tab                     = Color3.fromRGB(55, 55, 64),
-    TabActive               = Color3.fromRGB(55, 55, 64),
-    TabHover                = Color3.fromRGB(46, 46, 55),
-    TabGradientTop          = Color3.fromRGB(32, 32, 42),
-    TabGradientBottom       = Color3.fromRGB(23, 23, 30),
+    Tab                     = Color3.fromRGB(56, 56, 69),
+    TabActive               = Color3.fromRGB(43, 41, 52),
+    TabHover                = Color3.fromRGB(52, 52, 63),
+    TabGradientTop          = Color3.fromRGB(47, 47, 56),
+    TabGradientBottom       = Color3.fromRGB(24, 24, 28),
     TabActiveGradientTop    = Color3.fromRGB(55, 55, 64),
-    TabActiveGradientBottom = Color3.fromRGB(35, 35, 43),
-    TabHoverGradientTop     = Color3.fromRGB(46, 46, 55),
-    TabHoverGradientBottom  = Color3.fromRGB(36, 36, 44),
-    TabBorder               = Color3.fromRGB(55, 55, 64),
-    TabOutline              = Color3.fromRGB(55, 55, 64),
+    TabActiveGradientBottom = Color3.fromRGB(36, 36, 43),
+    TabHoverGradientTop     = Color3.fromRGB(47, 47, 56),
+    TabHoverGradientBottom  = Color3.fromRGB(24, 24, 28),
+    TabBorder               = Color3.fromRGB(56, 56, 69),
+    TabOutline              = Color3.fromRGB(56, 56, 69),
     Border                  = Color3.fromRGB(51, 51, 58),
     GroupboxOuterBorder     = Color3.fromRGB(18, 18, 26),
     BorderSoft              = Color3.fromRGB(39, 39, 47),
     BorderDark              = Color3.fromRGB(18, 18, 24),
     Text                    = Color3.fromRGB(205, 205, 205),
-    TextDim                 = Color3.fromRGB(156, 156, 168),
+    TextDim                 = Color3.fromRGB(201, 201, 218),
     ControlOuter            = Color3.fromRGB(18, 18, 24),
     ControlTop              = Color3.fromRGB(41, 41, 51),
     ControlBottom           = Color3.fromRGB(36, 36, 44),
@@ -134,7 +134,7 @@ local function FilterProtectedList(List)
     end
 
     local Filtered = { };
-    for _, Object in List do
+    for _, Object in ipairs(List) do
         if (not IsProtectedInstance(Object)) then
             TableInsert(Filtered, Object);
         end
@@ -248,7 +248,7 @@ function Library:ProtectInstance(Object)
 
     self._ProtectedInstances[Object] = true;
 
-    for _, Descendant in Object:GetDescendants() do
+    for _, Descendant in ipairs(Object:GetDescendants()) do
         self._ProtectedInstances[Descendant] = true;
     end
 
@@ -264,7 +264,7 @@ end
 function Library:UnprotectInstance(Object)
     self._ProtectedInstances[Object] = nil;
 
-    for _, Descendant in Object:GetDescendants() do
+    for _, Descendant in ipairs(Object:GetDescendants()) do
         self._ProtectedInstances[Descendant] = nil;
     end
 
@@ -354,10 +354,10 @@ local Layout = {
     GroupboxGap         = 12,
     ColumnTitleOverhang = 8,
     TextSize            = 11,
-    TabBarHeight        = 28,
-    TabInnerHeight      = 26,
+    TabBarHeight        = 25,
+    TabInnerHeight      = 24,
     SubTabTopPadding    = 0,
-    GroupboxContentTop  = 6,
+    GroupboxContentTop  = 10,
     GroupboxContentZ    = 109,
 };
 
