@@ -39,7 +39,7 @@ function Library:SetThemeColor(Key, Value)
         local Changed = false;
         local Points  = { };
 
-        for _, Point in ipairs(Sequence.Keypoints) do
+        for _, Point in Sequence.Keypoints do
             local Color = Point.Value;
             if (Color == Old) then
                 Color   = Value;
@@ -51,10 +51,10 @@ function Library:SetThemeColor(Key, Value)
         return Changed and ColorSequence.new(Points) or Sequence;
     end
 
-    for _, WindowObject in ipairs(self.Windows) do
+    for _, WindowObject in self.Windows do
         if (not WindowObject.Gui) then continue; end
 
-        for _, Object in ipairs(WindowObject.Gui:GetDescendants()) do
+        for _, Object in WindowObject.Gui:GetDescendants() do
             if (Object:IsA("GuiObject")) then
                 if (Object.BackgroundColor3 == Old) then Object.BackgroundColor3 = Value; end
                 if (Object:IsA("TextLabel") or Object:IsA("TextButton") or Object:IsA("TextBox")) and (Object.TextColor3 == Old) then
@@ -84,7 +84,7 @@ end
 function Library.ConfigManager:Encode()
     local Base = { modules = { } };
 
-    for _, Option in ipairs(Library._ConfigEntries) do
+    for _, Option in Library._ConfigEntries do
         local GroupboxObject = Option.Groupbox;
         local ModuleName     = (GroupboxObject and GroupboxObject.Title) or "Global";
         local Module         = Base.modules[ModuleName];
@@ -109,7 +109,7 @@ function Library.ConfigManager:Refresh()
 
     if (not ConfigUtil.EnsureDirectory()) then return self.Configs; end
 
-    for _, File in ipairs(listfiles(self.Directory)) do
+    for _, File in listfiles(self.Directory) do
         local Name = ToString(File):match("([^/\\]+)%.cfg$");
         if (Name) then
             self.Configs[Name] = { Name = Name, File = File };
@@ -170,7 +170,7 @@ function Library.ConfigManager:Load(Config)
         return false;
     end
 
-    for _, Option in ipairs(Library._ConfigEntries) do
+    for _, Option in Library._ConfigEntries do
         local GroupboxObject = Option.Groupbox;
         local ModuleName     = (GroupboxObject and GroupboxObject.Title) or "Global";
         local Module         = Data.modules[ModuleName];
@@ -242,7 +242,7 @@ end
 function Library.ConfigManager:GetConfigs()
     local Packed  = { };
     local Configs = self:Refresh();
-    for Name in pairs(Configs) do
+    for Name in Configs do
         TableInsert(Packed, Name);
     end
     table.sort(Packed);

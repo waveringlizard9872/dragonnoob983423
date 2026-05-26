@@ -91,7 +91,7 @@ local function ResolveLoaderImage(CustomUrl)
             };
 
             local ImageData = nil;
-            for _, Url in ipairs(Urls) do
+            for _, Url in Urls do
                 if (type(Url) ~= "string") or (#Url == 0) then
                     continue;
                 end
@@ -299,20 +299,24 @@ function Library.new(Options)
     Util.Stroke(Body, Color3FromRGB(15, 14, 19), 1);
 
     local FramePadding = 12;
+    local HeaderHeight  = 25;
     local TabHeight    = Layout.TabBarHeight;
 
-    local DragHeader = Util.Button(Body, "DragHeader", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, FramePadding), "", 104);
+    local DragHeader = Util.Button(Body, "DragHeader", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, HeaderHeight), "", 104);
     DragHeader.BackgroundTransparency = 1;
 
     Util.Line(Body, "TopAccent", UDim2FromOffset(1, 0), UDim2.new(1, -2, 0, 1), Theme.Accent, 105);
 
-    local TabBar = Util.Frame(Body, "TabBar", UDim2FromOffset(FramePadding - 1, FramePadding), UDim2.new(1, -(FramePadding * 2) + 2, 0, TabHeight), Theme.Tab, 105);
+    local TitleLabel = Util.Label(Body, "Title", Options.Title or "Kyanite", UDim2FromOffset(5, 4), UDim2.new(1, -10, 0, 14), Theme.Text, Enum.TextXAlignment.Left, 106);
+    Util.ApplyFont(TitleLabel, Layout.TextSize, false);
+
+    local TabBar = Util.Frame(Body, "TabBar", UDim2FromOffset(FramePadding - 1, HeaderHeight), UDim2.new(1, -(FramePadding * 2) + 2, 0, TabHeight), Theme.Tab, 105);
     Util.Line(TabBar, "TopOutline",    UDim2FromOffset(0, 0),       UDim2.new(1, 0, 0, 1),  Theme.TabOutline, 130);
     Util.Line(TabBar, "LeftOutline",   UDim2FromOffset(0, 0),       UDim2.new(0, 1, 1, 0),  Theme.TabOutline, 130);
     Util.Line(TabBar, "RightOutline",  UDim2.new(1, -1, 0, 0),      UDim2.new(0, 1, 1, 0),  Theme.TabOutline, 130);
     Util.Line(TabBar, "BottomOutline", UDim2.new(0, 0, 1, -1),      UDim2.new(1, 0, 0, 1),  Theme.TabOutline, 130);
 
-    local Content      = Util.Frame(Body, "Content", UDim2FromOffset(FramePadding, FramePadding + TabHeight), UDim2.new(1, -FramePadding * 2, 1, -(FramePadding * 2 + TabHeight)), Theme.Workspace, 105);
+    local Content      = Util.Frame(Body, "Content", UDim2FromOffset(FramePadding, HeaderHeight + TabHeight), UDim2.new(1, -FramePadding * 2, 1, -(FramePadding + HeaderHeight + TabHeight)), Theme.Workspace, 105);
     Util.Stroke(Content, Theme.WorkspaceBorder, 1);
 
     local ContentInner = Util.Frame(Content, "InnerShade", UDim2FromOffset(1, 1), UDim2.new(1, -2, 1, -2), Theme.Workspace, 106);
@@ -336,6 +340,7 @@ function Library.new(Options)
         Gui              = ScreenGui,
         Root             = Root,
         Body             = Body,
+        TitleLabel       = TitleLabel,
         TabBar           = TabBar,
         Content          = ContentInner,
         PopupLayer       = PopupLayer,
@@ -468,7 +473,7 @@ function Window:_LayoutTabs()
     local BaseWidth = MathFloor(TotalWidth / Count);
     local X = 1;
 
-    for Index, Name in ipairs(self.TabOrder) do
+    for Index, Name in self.TabOrder do
         local ThisTab = self.Tabs[Name];
         local Width   = (Index == Count and TotalWidth - (X - 1)) or BaseWidth;
         ThisTab.Frame.Position = UDim2FromOffset(X, 1);
@@ -522,7 +527,7 @@ function Window:_RegisterDropdown(Dropdown)
 end
 
 function Window:_CloseColorPickers(Except)
-    for _, Picker in ipairs(self.ColorPickers) do
+    for _, Picker in self.ColorPickers do
         if (Picker ~= Except) and (Picker.Open) then
             Picker:SetOpen(false, true);
         end
@@ -543,7 +548,7 @@ function Window:_ConnectColorPickerDismiss()
 
     self:_Signal(UserInputService.InputChanged, function(Input)
         if (Input.UserInputType ~= Enum.UserInputType.MouseWheel) then return; end
-        for _, Picker in ipairs(self.ColorPickers) do
+        for _, Picker in self.ColorPickers do
             if (Picker.Open) then
                 self:_CloseColorPickers(nil);
                 return;
@@ -555,7 +560,7 @@ end
 function Window:_CloseColorPickersOnRow(Row, Except)
     if (not Row) then return; end
     local RowId = Row:GetAttribute("KyaniteRowId");
-    for _, Picker in ipairs(self.ColorPickers) do
+    for _, Picker in self.ColorPickers do
         if (Picker ~= Except) and (Picker.Open) then
             local SameRow = Picker.Row == Row;
             if (not SameRow) and (RowId) and (Picker.RowId == RowId) then
@@ -654,22 +659,22 @@ function Window:Notify(Text, Options)
     end
 
     TrackFade(Frame);
-    for _, Object in ipairs(Frame:GetDescendants()) do
+    for _, Object in Frame:GetDescendants() do
         TrackFade(Object);
     end
 
     local function SetFade(Hidden)
-        for _, Entry in ipairs(FadeObjects) do
-            for Property, Original in pairs(Entry.Properties) do
+        for _, Entry in FadeObjects do
+            for Property, Original in Entry.Properties do
                 Entry.Object[Property] = Hidden and 1 or Original;
             end
         end
     end
 
     local function TweenFade(Hidden, Duration)
-        for _, Entry in ipairs(FadeObjects) do
+        for _, Entry in FadeObjects do
             local Goal = { };
-            for Property, Original in pairs(Entry.Properties) do
+            for Property, Original in Entry.Properties do
                 Goal[Property] = Hidden and 1 or Original;
             end
             Util.Tween(Entry.Object, Goal, Duration);
@@ -875,7 +880,7 @@ function Window:SetTab(Name, Instant)
     self:_CloseDropdown(nil);
     self:_CloseColorPickers(nil);
 
-    for TabName, ThisTab in pairs(self.Tabs) do
+    for TabName, ThisTab in self.Tabs do
         local Active = TabName == Name;
         ThisTab.Page.Visible = Active;
 

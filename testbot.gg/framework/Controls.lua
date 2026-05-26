@@ -87,9 +87,10 @@ function Groupbox:AddCheckbox(Text, X, Y, Checked, ColorBox, Callback)
     local Row = Util.Frame(Parent, `Checkbox_{Util.CleanName(Text)}`, UDim2FromOffset(X, Y), UDim2FromOffset(210, 14), Theme.Body, 118);
     Row.BackgroundTransparency = 1;
 
-    local Square    = Util.Frame(Row, "Square", UDim2FromOffset(0, 4), UDim2FromOffset(6, 6), Theme.CheckboxOff, 119);
-    Util.Stroke(Square, Theme.DropdownOutline, 1);
-    local TextLabel = Util.Label(Row, "Text", Text, UDim2FromOffset(19, 0), UDim2FromOffset(ColorBox and 154 or 182, 14), Theme.Text, Enum.TextXAlignment.Left, 119);
+    local Square = Util.Frame(Row, "Square", UDim2FromOffset(0, 3), UDim2FromOffset(8, 8), Theme.DropdownOutline, 119);
+    local SquareFill = Util.Frame(Square, "Fill", UDim2FromOffset(1, 1), UDim2.new(1, -2, 1, -2), Theme.CheckboxOff, 120);
+    Util.Gradient(SquareFill, Theme.CheckboxOff, Color3FromRGB(65, 65, 76));
+    local TextLabel = Util.Label(Row, "Text", Text, UDim2FromOffset(17, 0), UDim2FromOffset(ColorBox and 156 or 184, 14), Theme.Text, Enum.TextXAlignment.Left, 119);
     local Swatch;
 
     if (ColorBox) then
@@ -112,6 +113,12 @@ function Groupbox:AddCheckbox(Text, X, Y, Checked, ColorBox, Callback)
     CheckboxObject:Set(CheckboxObject.Value, true);
 
     local Hitbox = Util.Button(Row, "Hitbox", UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), "", 125);
+    self.Window:_Signal(Hitbox.MouseEnter, function()
+        if (not CheckboxObject.Value) then SquareFill.BackgroundColor3 = Color3FromRGB(83, 83, 94); end
+    end)
+    self.Window:_Signal(Hitbox.MouseLeave, function()
+        if (not CheckboxObject.Value) then SquareFill.BackgroundColor3 = Theme.CheckboxOff; end
+    end)
     self.Window:_Signal(Hitbox.InputBegan, function(Input)
         if (self.Window:_IsInputBlockedByPopup(Input)) then return; end
         if (Util.IsClickInput(Input)) then CheckboxObject:Set(not CheckboxObject.Value); end
@@ -197,11 +204,13 @@ function Groupbox:AddDropdown(Text, X, Y, Width, Values, Default, Callback)
         Open       = false,
     }, Dropdown);
 
-    for Index, Value in ipairs(Values) do
+    for Index, Value in Values do
         DropdownObject:_AddOption(Index, Value);
     end
 
     local Hitbox = Util.Button(Control, "Hitbox", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, 19), "", 145);
+    self.Window:_Signal(Hitbox.MouseEnter, function() Util.SetControlState(Control, "hover"); end)
+    self.Window:_Signal(Hitbox.MouseLeave, function() Util.SetControlState(Control, "normal"); end)
     self.Window:_Signal(Hitbox.InputBegan, function(Input)
         if (self.Window:_IsInputBlockedByPopup(Input, DropdownObject)) then return; end
         if (Util.IsClickInput(Input)) then DropdownObject:SetOpen(not DropdownObject.Open); end
@@ -255,6 +264,7 @@ function Dropdown:SetOpen(Open)
     self.Menu.Visible  = Open;
     Util.SetDropdownArrow(self.Arrow, Open);
     self.Frame.BackgroundColor3 = Theme.ControlOuter;
+    Util.SetControlState(self.Frame, Open and "hover" or "normal");
     self.Window:_RefreshPopupBlocker();
 end
 
@@ -306,6 +316,8 @@ function Groupbox:AddKeyPicker(Text, X, Y, Width, Default, Callback)
     }, KeyPicker);
 
     local Hitbox = Util.Button(Control, "Hitbox", UDim2FromOffset(0, 0), UDim2.new(1, -20, 1, 0), "", 122);
+    self.Window:_Signal(Hitbox.MouseEnter, function() Util.SetControlState(Control, "hover"); end)
+    self.Window:_Signal(Hitbox.MouseLeave, function() Util.SetControlState(Control, "normal"); end)
     self.Window:_Signal(Hitbox.InputBegan, function(Input)
         if (self.Window:_IsInputBlockedByPopup(Input)) then return; end
         if (not Util.IsClickInput(Input)) then return; end
@@ -402,7 +414,11 @@ function Groupbox:AddTextBox(Text, Options)
     }, TextBox);
 
     self.Window:_Signal(Input.FocusLost, function()
+        Util.SetControlState(Control, "normal");
         TextBoxObject:Set(Input.Text);
+    end)
+    self.Window:_Signal(Input.Focused, function()
+        Util.SetControlState(Control, "hover");
     end)
 
     self:_FinishLayout("textbox");
@@ -467,14 +483,15 @@ function Groupbox:AddListBox(Text, Options)
 end
 
 function ListBox:Refresh()
-    for _, Row in ipairs(self.Rows) do Row:Destroy(); end
+    for _, Row in self.Rows do Row:Destroy(); end
     self.Rows = { };
 
     local Values    = type(self.Getter) == "function" and self.Getter() or self.Getter;
+    Values = Values or { };
     local RowHeight = self.RowHeight or 15;
     local Y         = 0;
 
-    for _, Value in ipairs(Values or { }) do
+    for _, Value in Values do
         local Name = ToString(Value);
         local Row  = Util.Button(self.Container, `Option_{Util.CleanName(Name)}`, UDim2FromOffset(0, Y), UDim2.new(1, 0, 0, RowHeight), Name, Layout.GroupboxContentZ + 3);
         Row.BackgroundTransparency = 0;
@@ -498,7 +515,7 @@ end
 
 function ListBox:Set(Value, Silent)
     self.Value = ToString(Value or "");
-    for _, Row in ipairs(self.Rows) do
+    for _, Row in self.Rows do
         Row.TextColor3       = (Row.Text == self.Value) and Theme.Accent or Theme.Text;
         Row.BackgroundColor3 = Theme.DropdownMenu;
     end
@@ -538,6 +555,9 @@ function Groupbox:AddSlider(Text, X, Y, Width, Ratio, ValueText, Callback)
     Util.Gradient(Track, Theme.TrackTop, Theme.TrackBottom);
     local Fill       = Util.Frame(Track, "Fill", UDim2FromOffset(0, 0), UDim2FromOffset(1, 5), Theme.Accent, 120);
     Util.Gradient(Fill, Theme.Accent, Theme.AccentDim);
+    Util.Line(Holder, "LeftTick", UDim2FromOffset(-3, 19), UDim2FromOffset(5, 1), Theme.TrackEnd, 120);
+    Util.Line(Holder, "RightTickV", UDim2FromOffset(Width + 2, 17), UDim2FromOffset(1, 5), Theme.TrackEnd, 120);
+    Util.Line(Holder, "RightTickH", UDim2FromOffset(Width, 19), UDim2FromOffset(5, 1), Theme.TrackEnd, 120);
     local ValueLabel = Util.Label(Holder, "Value", ValueText == nil and "" or ToString(ValueText), UDim2FromOffset(0, 17), UDim2FromOffset(32, 12), Theme.Text, Enum.TextXAlignment.Center, 130);
     Util.ApplyFont(ValueLabel, Layout.TextSize, true);
 
@@ -660,9 +680,24 @@ function Groupbox:AddButton(Text, X, Y, Width, Height, Callback)
     }, Button);
 
     local Hitbox = Util.Button(Control, "Hitbox", UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), "", 125);
+    local Hovering = false;
+    self.Window:_Signal(Hitbox.MouseEnter, function()
+        Hovering = true;
+        Util.SetControlState(Control, "hover");
+    end)
+    self.Window:_Signal(Hitbox.MouseLeave, function()
+        Hovering = false;
+        Util.SetControlState(Control, "normal");
+    end)
     self.Window:_Signal(Hitbox.InputBegan, function(Input)
         if (self.Window:_IsInputBlockedByPopup(Input)) then return; end
-        if (Util.IsClickInput(Input)) then ButtonObject:Press(); end
+        if (Util.IsClickInput(Input)) then
+            Util.SetControlState(Control, "pressed");
+            ButtonObject:Press();
+            task.delay(0.08, function()
+                if (Control) and (Control.Parent) then Util.SetControlState(Control, Hovering and "hover" or "normal"); end
+            end);
+        end
     end)
 
     if (Auto) then self:_FinishLayout("button"); else self:_ResizeAuto(); end

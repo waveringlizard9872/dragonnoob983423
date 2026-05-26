@@ -116,6 +116,7 @@ local Util = { }; do
 
     function Util.Gradient(Parent, TopColor, BottomColor)
         local Object = InstanceNew("UIGradient");
+        Object.Name     = "Gradient";
         Object.Color    = ColorSequence.new(TopColor, BottomColor);
         Object.Rotation = 90;
         Object.Parent   = Parent;
@@ -237,6 +238,9 @@ local Util = { }; do
         local Control = Util.Frame(Parent, Name, Position, Size, Theme.ControlOuter, ZIndex or 120);
         local Inner   = Util.Frame(Control, "Inner", UDim2FromOffset(1, 1), UDim2.new(1, -2, 1, -2), Color3.new(1, 1, 1), (ZIndex or 120) + 1);
         Util.Gradient(Inner, Theme.ControlTop, Theme.ControlBottom);
+        Control:SetAttribute("KyaniteControl", true);
+        Control:SetAttribute("KyaniteTopColor", Theme.ControlTop);
+        Control:SetAttribute("KyaniteBottomColor", Theme.ControlBottom);
         return Control, Inner;
     end
 
@@ -244,24 +248,50 @@ local Util = { }; do
         local Control = Util.Frame(Parent, Name, Position, Size, Theme.ControlOuter, ZIndex or 120);
         local Inner   = Util.Frame(Control, "Inner", UDim2FromOffset(1, 1), UDim2.new(1, -2, 1, -2), Color3.new(1, 1, 1), (ZIndex or 120) + 1);
         Util.Gradient(Inner, Theme.ButtonTop, Theme.ButtonBottom);
+        Control:SetAttribute("KyaniteControl", true);
+        Control:SetAttribute("KyaniteTopColor", Theme.ButtonTop);
+        Control:SetAttribute("KyaniteBottomColor", Theme.ButtonBottom);
         return Control, Inner;
     end
 
+    function Util.SetControlState(Control, State)
+        local Inner = Control and Control:FindFirstChild("Inner");
+        local Gradient = Inner and Inner:FindFirstChild("Gradient");
+        if (not Gradient) then return; end
+
+        local Top = Control:GetAttribute("KyaniteTopColor") or Theme.ControlTop;
+        local Bottom = Control:GetAttribute("KyaniteBottomColor") or Theme.ControlBottom;
+
+        if (State == "pressed") then
+            Top = (Top == Theme.ButtonTop and Theme.ButtonPressedTop) or Theme.ControlPressedTop;
+        elseif (State == "hover") then
+            Top = (Top == Theme.ButtonTop and Theme.ButtonHoverTop) or Theme.ControlHoverTop;
+        end
+
+        Gradient.Color = ColorSequence.new(Top, Bottom);
+    end
+
     function Util.SetDropdownArrow(Icon, Open)
+        local Shadow = Icon:FindFirstChild("Shadow");
+        if (Shadow) then
+            Shadow.Position = Open and UDim2FromOffset(1, 3) or UDim2FromOffset(1, 0);
+        end
+
         local Widths  = Open and { 7, 5, 3 } or { 3, 5, 7 };
         local Offsets = Open and { 0, 1, 2 } or { 2, 1, 0 };
         for Index = 1, 3 do
             local Row = Icon:FindFirstChild("Row" .. ToString(Index));
             if (Row) then
-                Row.Position = UDim2FromOffset(Offsets[Index], Index - 1);
+                Row.Position = UDim2FromOffset(Offsets[Index], (Open and Index or Index + 1) - 1);
                 Row.Size     = UDim2FromOffset(Widths[Index], 1);
             end
         end
     end
 
     function Util.MakeDropdownArrow(Parent, Name, Position, ZIndex)
-        local Icon = Util.Frame(Parent, Name, Position, UDim2FromOffset(7, 4), Theme.DropdownMenu, ZIndex or 121);
+        local Icon = Util.Frame(Parent, Name, Position, UDim2FromOffset(7, 5), Theme.DropdownMenu, ZIndex or 121);
         Icon.BackgroundTransparency = 1;
+        Util.Line(Icon, "Shadow", UDim2FromOffset(1, 0), UDim2FromOffset(5, 1), Color3.new(0, 0, 0), (ZIndex or 121) + 1);
         for Index = 1, 3 do
             Util.Line(Icon, "Row" .. ToString(Index), UDim2FromOffset(0, Index - 1), UDim2FromOffset(7, 1), Theme.DropdownArrow, (ZIndex or 121) + 2);
         end
@@ -270,17 +300,18 @@ local Util = { }; do
     end
 
     function Util.SetCheckboxVisual(Square, Value)
-        local Gradient = Square:FindFirstChild("CheckedGradient");
+        local Fill = Square:FindFirstChild("Fill") or Square;
+        local Gradient = Fill:FindFirstChild("CheckedGradient");
         if (not Gradient) then
             Gradient       = InstanceNew("UIGradient");
             Gradient.Name  = "CheckedGradient";
-            Gradient.Parent = Square;
+            Gradient.Parent = Fill;
         end
 
         Gradient.Enabled = Value == true;
         Gradient.Color   = ColorSequence.new(Theme.Accent, Theme.AccentDim);
 
-        Square.BackgroundColor3 = Value and Theme.Accent or Theme.CheckboxOff;
+        Fill.BackgroundColor3 = Value and Theme.Accent or Theme.CheckboxOff;
     end
 
     function Util.PositionPopup(Window, Popup, Anchor, YOffset)

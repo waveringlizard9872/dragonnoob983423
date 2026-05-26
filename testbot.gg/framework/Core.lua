@@ -16,40 +16,44 @@ local RunService = Service.RunService;
 
 -- Theme
 local Theme = {
-    Accent                  = Color3.fromRGB(126, 105, 217),
-    AccentDim               = Color3.fromRGB(78, 84, 165),
-    Outer                   = Color3.fromRGB(27, 27, 34),
-    OuterDark               = Color3.fromRGB(5, 5, 8),
-    OuterLight              = Color3.fromRGB(74, 72, 82),
-    Background              = Color3.fromRGB(25, 24, 31),
-    Body                    = Color3.fromRGB(26, 25, 33),
+    Accent                  = Color3.fromRGB(206, 115, 136),
+    AccentDim               = Color3.fromRGB(161, 75, 86),
+    Outer                   = Color3.fromRGB(23, 23, 30),
+    OuterDark               = Color3.fromRGB(14, 14, 22),
+    OuterLight              = Color3.fromRGB(62, 62, 72),
+    Background              = Color3.fromRGB(23, 23, 30),
+    Body                    = Color3.fromRGB(23, 23, 30),
     Groupbox                = Color3.fromRGB(27, 27, 34),
     Workspace               = Color3.fromRGB(32, 32, 38),
     WorkspaceBorder         = Color3.fromRGB(39, 39, 47),
     FramePadding            = Color3.fromRGB(23, 23, 30),
     BodyDark                = Color3.fromRGB(6, 6, 9),
-    Tab                     = Color3.fromRGB(56, 56, 69),
-    TabActive               = Color3.fromRGB(43, 41, 52),
-    TabHover                = Color3.fromRGB(35, 33, 42),
-    TabGradientTop          = Color3.fromRGB(47, 47, 56),
-    TabGradientBottom       = Color3.fromRGB(24, 24, 28),
+    Tab                     = Color3.fromRGB(55, 55, 64),
+    TabActive               = Color3.fromRGB(55, 55, 64),
+    TabHover                = Color3.fromRGB(46, 46, 55),
+    TabGradientTop          = Color3.fromRGB(32, 32, 42),
+    TabGradientBottom       = Color3.fromRGB(23, 23, 30),
     TabActiveGradientTop    = Color3.fromRGB(55, 55, 64),
-    TabActiveGradientBottom = Color3.fromRGB(36, 36, 43),
-    TabHoverGradientTop     = Color3.fromRGB(47, 47, 56),
-    TabHoverGradientBottom  = Color3.fromRGB(24, 24, 28),
-    TabBorder               = Color3.fromRGB(56, 56, 69),
-    TabOutline              = Color3.fromRGB(56, 56, 69),
-    Border                  = Color3.fromRGB(61, 59, 70),
-    GroupboxOuterBorder     = Color3.fromRGB(15, 15, 22),
-    BorderSoft              = Color3.fromRGB(45, 43, 53),
-    BorderDark              = Color3.fromRGB(3, 3, 5),
-    Text                    = Color3.fromRGB(238, 238, 238),
-    TextDim                 = Color3.fromRGB(185, 183, 190),
+    TabActiveGradientBottom = Color3.fromRGB(35, 35, 43),
+    TabHoverGradientTop     = Color3.fromRGB(46, 46, 55),
+    TabHoverGradientBottom  = Color3.fromRGB(36, 36, 44),
+    TabBorder               = Color3.fromRGB(55, 55, 64),
+    TabOutline              = Color3.fromRGB(55, 55, 64),
+    Border                  = Color3.fromRGB(51, 51, 58),
+    GroupboxOuterBorder     = Color3.fromRGB(18, 18, 26),
+    BorderSoft              = Color3.fromRGB(39, 39, 47),
+    BorderDark              = Color3.fromRGB(18, 18, 24),
+    Text                    = Color3.fromRGB(205, 205, 205),
+    TextDim                 = Color3.fromRGB(156, 156, 168),
     ControlOuter            = Color3.fromRGB(18, 18, 24),
     ControlTop              = Color3.fromRGB(41, 41, 51),
     ControlBottom           = Color3.fromRGB(36, 36, 44),
+    ControlHoverTop         = Color3.fromRGB(46, 46, 55),
+    ControlPressedTop       = Color3.fromRGB(56, 56, 64),
     ButtonTop               = Color3.fromRGB(41, 41, 49),
     ButtonBottom            = Color3.fromRGB(36, 36, 43),
+    ButtonHoverTop          = Color3.fromRGB(46, 46, 54),
+    ButtonPressedTop        = Color3.fromRGB(56, 56, 64),
     ControlOpen             = Color3.fromRGB(72, 70, 78),
     DropdownMenu            = Color3.fromRGB(40, 40, 50),
     DropdownOutline         = Color3.fromRGB(18, 18, 24),
@@ -59,8 +63,9 @@ local Theme = {
     ColorPickerPopupBorder  = Color3.fromRGB(18, 18, 24),
     ColorPickerOuter        = Color3.fromRGB(18, 18, 26),
     Track                   = Color3.fromRGB(18, 18, 24),
-    TrackTop                = Color3.fromRGB(38, 38, 48),
-    TrackBottom             = Color3.fromRGB(53, 53, 60),
+    TrackTop                = Color3.fromRGB(46, 46, 56),
+    TrackBottom             = Color3.fromRGB(55, 55, 62),
+    TrackEnd                = Color3.fromRGB(105, 105, 112),
     CheckboxOff             = Color3.fromRGB(75, 75, 86),
     White                   = Color3.fromRGB(255, 255, 255),
 };
@@ -129,7 +134,7 @@ local function FilterProtectedList(List)
     end
 
     local Filtered = { };
-    for _, Object in ipairs(List) do
+    for _, Object in List do
         if (not IsProtectedInstance(Object)) then
             TableInsert(Filtered, Object);
         end
@@ -243,7 +248,7 @@ function Library:ProtectInstance(Object)
 
     self._ProtectedInstances[Object] = true;
 
-    for _, Descendant in ipairs(Object:GetDescendants()) do
+    for _, Descendant in Object:GetDescendants() do
         self._ProtectedInstances[Descendant] = true;
     end
 
@@ -259,7 +264,7 @@ end
 function Library:UnprotectInstance(Object)
     self._ProtectedInstances[Object] = nil;
 
-    for _, Descendant in ipairs(Object:GetDescendants()) do
+    for _, Descendant in Object:GetDescendants() do
         self._ProtectedInstances[Descendant] = nil;
     end
 

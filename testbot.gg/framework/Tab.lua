@@ -41,7 +41,7 @@ function Tab:_RelayoutGroupboxes()
     local LeftEntries  = { };
     local RightEntries = { };
 
-    for _, GroupboxObject in ipairs(self.Groupboxes) do
+    for _, GroupboxObject in self.Groupboxes do
         if (not GroupboxObject.Auto) then continue; end
 
         local Height = MathMax(145, GroupboxObject._AutoHeight or GroupboxObject.Frame.Size.Y.Offset);
@@ -82,7 +82,7 @@ function Tab:_RelayoutGroupboxes()
     SetColumnScroll(self.LeftSide,  #LeftEntries);
     SetColumnScroll(self.RightSide, #RightEntries);
 
-    for Index, Entry in ipairs(LeftEntries) do
+    for Index, Entry in LeftEntries do
         Entry.Groupbox.Frame.Parent      = self.LeftSide;
         Entry.Groupbox.Frame.LayoutOrder = Index;
         Entry.Groupbox.Frame.Position    = UDim2FromOffset(0, 0);
@@ -90,7 +90,7 @@ function Tab:_RelayoutGroupboxes()
         TaskDefer(function() Entry.Groupbox:_UpdateContentScroll(); end)
     end
 
-    for Index, Entry in ipairs(RightEntries) do
+    for Index, Entry in RightEntries do
         Entry.Groupbox.Frame.Parent      = self.RightSide;
         Entry.Groupbox.Frame.LayoutOrder = Index;
         Entry.Groupbox.Frame.Position    = UDim2FromOffset(0, 0);
@@ -98,7 +98,7 @@ function Tab:_RelayoutGroupboxes()
         TaskDefer(function() Entry.Groupbox:_UpdateContentScroll(); end)
     end
 
-    for _, GroupboxObject in ipairs(self.Groupboxes) do
+    for _, GroupboxObject in self.Groupboxes do
         GroupboxObject:_UpdateContentScroll();
     end
 end
@@ -144,25 +144,24 @@ function Tab:AddGroupbox(Title, Position, Size)
     local Parent = Auto and self.LeftSide or self.Page;
     local Box    = Util.Frame(Parent, `Groupbox_{Util.CleanName(Title)}`, Position, Size, Theme.Groupbox, 108);
 
-    Util.Line(Box, "OuterTop",    UDim2FromOffset(0, 0),        UDim2.new(1, 0, 0, 1),  Theme.GroupboxOuterBorder, 110);
-    Util.Line(Box, "OuterLeft",   UDim2FromOffset(0, 0),        UDim2.new(0, 1, 1, 0),  Theme.GroupboxOuterBorder, 110);
-    Util.Line(Box, "OuterRight",  UDim2.new(1, -1, 0, 0),       UDim2.new(0, 1, 1, 0),  Theme.GroupboxOuterBorder, 110);
+    Util.Line(Box, "OuterTop",    UDim2FromOffset(0, 4),        UDim2.new(1, 0, 0, 1),  Theme.GroupboxOuterBorder, 110);
+    Util.Line(Box, "OuterLeft",   UDim2FromOffset(0, 4),        UDim2.new(0, 1, 1, -3),  Theme.GroupboxOuterBorder, 110);
+    Util.Line(Box, "OuterRight",  UDim2.new(1, -1, 0, 4),       UDim2.new(0, 1, 1, -3),  Theme.GroupboxOuterBorder, 110);
     Util.Line(Box, "OuterBottom", UDim2.new(0, 0, 1, -1),       UDim2.new(1, 0, 0, 1),  Theme.GroupboxOuterBorder, 110);
 
-    local TitleX         = 12;
+    local TitleX         = 10;
     local TitlePadding   = 1;
     local TitleTextWidth = MathMax(1, MathCeil(Util.MeasureText(Title, Layout.TextSize)) - 4);
     local TitleWidth     = TitleTextWidth + TitlePadding * 2;
-    local RightLineX     = TitleX + TitleWidth + 1;
+    local RightLineX     = 20 + TitleTextWidth;
 
-    local TopLeft  = Util.Line(Box, "TopLeft",  UDim2FromOffset(1, 1),           UDim2FromOffset(TitleX - 1, 1),                  Theme.Border, 111);
-    local TopRight = Util.Line(Box, "TopRight", UDim2FromOffset(RightLineX, 1),   UDim2.new(1, -(RightLineX + 1), 0, 1),           Theme.Border, 111);
-    Util.Line(Box, "Left",   UDim2FromOffset(1, 1),           UDim2.new(0, 1, 1, -2), Theme.Border, 111);
-    Util.Line(Box, "Right",  UDim2.new(1, -2, 0, 1),          UDim2.new(0, 1, 1, -2), Theme.Border, 111);
+    local TopLeft  = Util.Line(Box, "TopLeft",  UDim2FromOffset(1, 5),           UDim2FromOffset(TitleX - 1, 1),                  Theme.Border, 111);
+    local TopRight = Util.Line(Box, "TopRight", UDim2FromOffset(RightLineX, 5),   UDim2.new(1, -(RightLineX + 1), 0, 1),           Theme.Border, 111);
+    Util.Line(Box, "Left",   UDim2FromOffset(1, 5),           UDim2.new(0, 1, 1, -6), Theme.Border, 111);
+    Util.Line(Box, "Right",  UDim2.new(1, -2, 0, 5),          UDim2.new(0, 1, 1, -6), Theme.Border, 111);
     Util.Line(Box, "Bottom", UDim2.new(0, 1, 1, -2),          UDim2.new(1, -2, 0, 1), Theme.Border, 111);
 
-    local TitleBack  = Util.Frame(Box, "TitleBack", UDim2FromOffset(TitleX, -7), UDim2FromOffset(TitleWidth, 14), Theme.Groupbox, 112);
-    TitleBack.BackgroundTransparency = 1;
+    local TitleBack  = Util.Frame(Box, "TitleBack", UDim2FromOffset(TitleX, -1), UDim2FromOffset(TitleWidth, 12), Theme.Groupbox, 112);
     local TitleLabel = Util.Label(TitleBack, "Title", Title, UDim2FromOffset(TitlePadding, 0), UDim2FromOffset(TitleTextWidth, 14), Theme.Text, Enum.TextXAlignment.Left, 113);
     Util.ApplyFont(TitleLabel, Layout.TextSize, true);
 
@@ -170,11 +169,11 @@ function Tab:AddGroupbox(Title, Position, Size)
         local Measured = MathCeil(TitleLabel.TextBounds.X);
         if (Measured <= 0) then return; end
         local NextTitleWidth = Measured + TitlePadding * 2;
-        local NextRightLineX = TitleX + NextTitleWidth + 1;
+        local NextRightLineX = 20 + Measured;
         TopLeft.Size        = UDim2FromOffset(TitleX - 1, 1);
-        TopRight.Position   = UDim2FromOffset(NextRightLineX, 1);
+        TopRight.Position   = UDim2FromOffset(NextRightLineX, 5);
         TopRight.Size       = UDim2.new(1, -(NextRightLineX + 1), 0, 1);
-        TitleBack.Size      = UDim2FromOffset(NextTitleWidth, 14);
+        TitleBack.Size      = UDim2FromOffset(NextTitleWidth, 12);
         TitleLabel.Size     = UDim2FromOffset(Measured, 14);
     end
 
