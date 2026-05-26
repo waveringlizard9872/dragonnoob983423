@@ -98,7 +98,7 @@ end
 
 function Groupbox:_ResizeAuto()
     local ContentHeight = self:_GetContentHeight();
-    local NaturalHeight = MathMax(1, Layout.GroupboxContentTop + ContentHeight + 2);
+    local NaturalHeight = MathMax(self.MinHeight or 0, Layout.GroupboxContentTop + ContentHeight + 2);
     self._AutoHeight    = NaturalHeight;
 
     if (not self.Auto) then

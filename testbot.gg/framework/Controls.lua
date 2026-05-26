@@ -87,10 +87,10 @@ function Groupbox:AddCheckbox(Text, X, Y, Checked, ColorBox, Callback)
     local Row = Util.Frame(Parent, `Checkbox_{Util.CleanName(Text)}`, UDim2FromOffset(X, Y), UDim2FromOffset(210, 14), Theme.Body, 118);
     Row.BackgroundTransparency = 1;
 
-    local Square = Util.Frame(Row, "Square", UDim2FromOffset(0, 3), UDim2FromOffset(8, 8), Theme.DropdownOutline, 119);
+    local Square = Util.Frame(Row, "Square", UDim2FromOffset(1, 2), UDim2FromOffset(8, 8), Theme.DropdownOutline, 119);
     local SquareFill = Util.Frame(Square, "Fill", UDim2FromOffset(1, 1), UDim2.new(1, -2, 1, -2), Theme.CheckboxOff, 120);
     Util.Gradient(SquareFill, Theme.CheckboxOff, Color3FromRGB(65, 65, 76));
-    local TextLabel = Util.Label(Row, "Text", Text, UDim2FromOffset(17, 0), UDim2FromOffset(ColorBox and 156 or 184, 14), Theme.Text, Enum.TextXAlignment.Left, 119);
+    local TextLabel = Util.Label(Row, "Text", Text, UDim2FromOffset(20, -1), UDim2FromOffset(ColorBox and 156 or 184, 14), Theme.Text, Enum.TextXAlignment.Left, 119);
     local Swatch;
 
     if (ColorBox) then
@@ -141,7 +141,7 @@ function Checkbox:AddColorPicker(Text, Options)
     Options         = type(Options) == "table" and Options or { Default = Options };
     Options.Compact = Options.Compact ~= false;
     Options.Parent  = Options.Parent or self.Instance;
-    Options.Y       = Options.Y or 4;
+    Options.Y       = Options.Y or 3;
     Options.X       = Options.X or 181;
     return self.Groupbox:AddColorPicker(Text or self.TextLabel.Text, Options);
 end
@@ -169,7 +169,7 @@ function Groupbox:AddDropdown(Text, X, Y, Width, Values, Default, Callback)
     local ElementY = 0;
 
     if (Auto) then
-        Parent   = self:_LayoutHolder(`LayoutDropdown_{Util.CleanName(Text)}`, 33, 5);
+        Parent   = self:_LayoutHolder(`LayoutDropdown_{Util.CleanName(Text)}`, 34, 5);
         X        = X or 50;
         Y        = Y or 0;
         Width    = Width or 160;
@@ -180,7 +180,7 @@ function Groupbox:AddDropdown(Text, X, Y, Width, Values, Default, Callback)
 
     Util.Label(Parent, `Text_{Util.CleanName(Text)}`, Text, UDim2FromOffset(X, ElementY), UDim2FromOffset(Width, 14), Theme.Text, Enum.TextXAlignment.Left, 118);
 
-    local Control = Util.MakeControl(Parent, `Dropdown_{Util.CleanName(Text)}`, UDim2FromOffset(X, ElementY + 14), UDim2FromOffset(Width, 19), 118);
+    local Control = Util.MakeControl(Parent, `Dropdown_{Util.CleanName(Text)}`, UDim2FromOffset(X, ElementY + 14), UDim2FromOffset(Width, 20), 118);
 
     local ValueLabel = Util.Label(Control, "Value", Default, UDim2FromOffset(6, 0), UDim2.new(1, -24, 1, 0), Theme.Text, Enum.TextXAlignment.Left, 120);
     local Arrow      = Util.MakeDropdownArrow(Control, "Arrow", UDim2.new(1, -12, 0, 8), 122);
@@ -208,7 +208,7 @@ function Groupbox:AddDropdown(Text, X, Y, Width, Values, Default, Callback)
         DropdownObject:_AddOption(Index, Value);
     end
 
-    local Hitbox = Util.Button(Control, "Hitbox", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, 19), "", 145);
+    local Hitbox = Util.Button(Control, "Hitbox", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, 20), "", 145);
     self.Window:_Signal(Hitbox.MouseEnter, function() Util.SetControlState(Control, "hover"); end)
     self.Window:_Signal(Hitbox.MouseLeave, function() Util.SetControlState(Control, "normal"); end)
     self.Window:_Signal(Hitbox.InputBegan, function(Input)
@@ -285,7 +285,7 @@ function Groupbox:AddKeyPicker(Text, X, Y, Width, Default, Callback)
     local ElementY = Y;
 
     if (Auto) then
-        Parent   = self:_LayoutHolder(`LayoutKeyPicker_{Util.CleanName(Text)}`, 33, 5);
+        Parent   = self:_LayoutHolder(`LayoutKeyPicker_{Util.CleanName(Text)}`, 38, 5);
         X        = X or 50;
         Y        = Y or 0;
         Width    = Width or 160;
@@ -294,17 +294,17 @@ function Groupbox:AddKeyPicker(Text, X, Y, Width, Default, Callback)
 
     Util.Label(Parent, `Text_{Util.CleanName(Text)}`, Text, UDim2FromOffset(X, ElementY), UDim2FromOffset(Width, 14), Theme.Text, Enum.TextXAlignment.Left, 118);
 
-    local Control = Util.MakeControl(Parent, `KeyPicker_{Util.CleanName(Text)}`, UDim2FromOffset(X, ElementY + 14), UDim2FromOffset(Width, 19), 118);
+    local Control = Util.MakeControl(Parent, `KeyPicker_{Util.CleanName(Text)}`, UDim2FromOffset(X, ElementY + 14), UDim2FromOffset(Width, 24), 118);
 
     local ValueLabel = Util.Label(Control, "Value", Default or "None", UDim2FromOffset(6, 0), UDim2.new(1, -26, 1, 0), Theme.Text, Enum.TextXAlignment.Left, 120);
-    local Clear      = Util.Frame(Control, "Clear", UDim2.new(1, -19, 0, 0), UDim2FromOffset(18, 19), Theme.ControlOuter, 123);
+    local Clear      = Util.Frame(Control, "Clear", UDim2.new(1, -19, 0, 0), UDim2FromOffset(18, 24), Theme.ControlOuter, 123);
     Clear.BackgroundTransparency = 1;
     Clear.Active                 = true;
 
-    local ClearLineA = Util.Line(Clear, "LineA", UDim2FromOffset(5, 9), UDim2FromOffset(8, 1), Theme.DropdownArrow, 124);
+    local ClearLineA = Util.Line(Clear, "LineA", UDim2FromOffset(5, 11), UDim2FromOffset(8, 1), Theme.DropdownArrow, 124);
     ClearLineA.Rotation = 45;
 
-    local ClearLineB = Util.Line(Clear, "LineB", UDim2FromOffset(5, 9), UDim2FromOffset(8, 1), Theme.DropdownArrow, 124);
+    local ClearLineB = Util.Line(Clear, "LineB", UDim2FromOffset(5, 11), UDim2FromOffset(8, 1), Theme.DropdownArrow, 124);
     ClearLineB.Rotation = -45;
 
     local KeyPickerObject = setmetatable({
@@ -381,11 +381,11 @@ function Groupbox:AddTextBox(Text, Options)
 
     local Name     = Options.Text or "Input";
     local Width    = Options.Width   or 160;
-    local Height   = Options.Height  or 19;
+    local Height   = Options.Height  or 24;
     local Default  = Options.Default or "";
     local Callback = Options.Callback;
     local Parent   = self:_LayoutHolder(`LayoutTextBox_{Util.CleanName(Name)}`, Height + (Options.Y or 0), Options.BlankAfter or 5);
-    local Inset    = 6;
+    local Inset    = 7;
 
     local Control = Util.MakeControl(Parent, `TextBox_{Util.CleanName(Name)}`, UDim2FromOffset(Options.X or 50, Options.Y or 0), UDim2FromOffset(Width, Height), Layout.GroupboxContentZ);
 
@@ -528,9 +528,9 @@ local function ParseSliderArgs(X, Y, Width, Ratio, ValueText, Callback)
     if (Util.IsManualXY(X, Y)) then return false, X, Y, Width, Ratio, ValueText, Callback, nil; end
     if (type(X) == "table") then
         local Info = X;
-        return true, Info.X, Info.Y, Info.Width or 160, Info.Ratio or Info.Default or 0, Info.Text or Info.ValueText or Info.Value, Info.Callback, Info.Flag;
+        return true, Info.X, Info.Y, Info.Width or 166, Info.Ratio or Info.Default or 0, Info.Text or Info.ValueText or Info.Value, Info.Callback, Info.Flag;
     end
-    return true, nil, nil, 160, X or 0, Y, Width, nil;
+    return true, nil, nil, 166, X or 0, Y, Width, nil;
 end
 
 function Groupbox:AddSlider(Text, X, Y, Width, Ratio, ValueText, Callback)
@@ -539,26 +539,28 @@ function Groupbox:AddSlider(Text, X, Y, Width, Ratio, ValueText, Callback)
 
     local Parent = self.Frame;
     if (Auto) then
-        Parent = self:_LayoutHolder(`LayoutSlider_{Util.CleanName(Text)}`, 28, 4, true);
-        X      = X or 51;
+        Parent = self:_LayoutHolder(`LayoutSlider_{Util.CleanName(Text)}`, 18, 4);
+        X      = X or 47;
         Y      = Y or 0;
-        Width  = Width or 160;
+        Width  = Width or 166;
     end
 
-    local Holder = Util.Frame(Parent, `Slider_{Util.CleanName(Text)}`, UDim2FromOffset(X, Y), UDim2FromOffset(Width, 28), Theme.Body, 118);
+    local Holder = Util.Frame(Parent, `Slider_{Util.CleanName(Text)}`, UDim2FromOffset(X, Y), UDim2FromOffset(Width, 18), Theme.Body, 118);
     Holder.BackgroundTransparency = 1;
 
-    Util.Label(Holder, "Text", Text, UDim2FromOffset(0, 0), UDim2FromOffset(Width, 13), Theme.Text, Enum.TextXAlignment.Left, 119);
+    Util.Label(Holder, "Text", Text, UDim2FromOffset(4, -5), UDim2FromOffset(Width, 13), Theme.Text, Enum.TextXAlignment.Left, 119);
 
-    local Track      = Util.Frame(Holder, "Track", UDim2FromOffset(0, 17), UDim2FromOffset(Width, 5), Theme.Track, 119);
+    local TrackWidth = MathMax(8, Width - 6);
+    local FillWidth  = MathMax(1, TrackWidth - 2);
+    local Track      = Util.Frame(Holder, "Track", UDim2FromOffset(4, 7), UDim2FromOffset(TrackWidth, 7), Theme.Track, 119);
     Util.Stroke(Track, Theme.DropdownOutline, 1);
     Util.Gradient(Track, Theme.TrackTop, Theme.TrackBottom);
-    local Fill       = Util.Frame(Track, "Fill", UDim2FromOffset(0, 0), UDim2FromOffset(1, 5), Theme.Accent, 120);
+    local Fill       = Util.Frame(Track, "Fill", UDim2FromOffset(1, 1), UDim2FromOffset(1, 5), Theme.Accent, 120);
     Util.Gradient(Fill, Theme.Accent, Theme.AccentDim);
-    Util.Line(Holder, "LeftTick", UDim2FromOffset(-3, 19), UDim2FromOffset(5, 1), Theme.TrackEnd, 120);
-    Util.Line(Holder, "RightTickV", UDim2FromOffset(Width + 2, 17), UDim2FromOffset(1, 5), Theme.TrackEnd, 120);
-    Util.Line(Holder, "RightTickH", UDim2FromOffset(Width, 19), UDim2FromOffset(5, 1), Theme.TrackEnd, 120);
-    local ValueLabel = Util.Label(Holder, "Value", ValueText == nil and "" or ToString(ValueText), UDim2FromOffset(0, 17), UDim2FromOffset(32, 12), Theme.Text, Enum.TextXAlignment.Center, 130);
+    Util.Line(Holder, "LeftTick", UDim2FromOffset(-3, 10), UDim2FromOffset(5, 1), Theme.TrackEnd, 120);
+    Util.Line(Holder, "RightTickV", UDim2FromOffset(Width + 2, 8), UDim2FromOffset(1, 5), Theme.TrackEnd, 120);
+    Util.Line(Holder, "RightTickH", UDim2FromOffset(Width, 10), UDim2FromOffset(5, 1), Theme.TrackEnd, 120);
+    local ValueLabel = Util.Label(Holder, "Value", ValueText == nil and "" or ToString(ValueText), UDim2FromOffset(0, 8), UDim2FromOffset(32, 12), Theme.Text, Enum.TextXAlignment.Center, 130);
     Util.ApplyFont(ValueLabel, Layout.TextSize, true);
 
     local SliderObject = setmetatable({
@@ -567,7 +569,7 @@ function Groupbox:AddSlider(Text, X, Y, Width, Ratio, ValueText, Callback)
         Track      = Track,
         Fill       = Fill,
         ValueLabel = ValueLabel,
-        Width      = Width,
+        Width      = FillWidth,
         Ratio      = MathClamp(Ratio or 0, 0, 1),
         Callback   = Callback,
         Dragging   = false,
@@ -624,7 +626,7 @@ function Slider:_PositionLabel()
     local FillWidth  = MathFloor(self.Width * self.Ratio);
     local ValueWidth = MathMax(20, MathCeil(Util.MeasureText(self.ValueLabel.Text, Layout.TextSize)) + 4);
     self.ValueLabel.Size     = UDim2FromOffset(ValueWidth, 12);
-    self.ValueLabel.Position = UDim2FromOffset(FillWidth - MathFloor(ValueWidth / 2), 17);
+    self.ValueLabel.Position = UDim2FromOffset(5 + FillWidth - MathFloor(ValueWidth / 2), 8);
 end
 
 function Slider:_SetFromInput(Input)
@@ -650,33 +652,38 @@ end
 function Slider:Get() return self.Ratio; end
 
 local function ParseButtonArgs(X, Y, Width, Height, Callback)
-    if (Util.IsManualXY(X, Y)) then return false, X, Y, Width, Height, Callback; end
+    if (Util.IsManualXY(X, Y)) then return false, X, Y, Width, Height, Callback, nil, nil; end
     if (type(X) == "table") then
         local Info = X;
-        return true, Info.X, Info.Y, Info.Width or 160, Info.Height or 20, Info.Callback;
+        return true, Info.X, Info.Y, Info.Width or 160, Info.Height or 24, Info.Callback or Info.Func, Info.Confirm == true or Info.DoubleClick == true, Info.ConfirmText;
     end
-    return true, nil, nil, 160, 20, X;
+    return true, nil, nil, 160, 24, X, nil, nil;
 end
 
 function Groupbox:AddButton(Text, X, Y, Width, Height, Callback)
-    local Auto;
-    Auto, X, Y, Width, Height, Callback = ParseButtonArgs(X, Y, Width, Height, Callback);
+    local Auto, Confirm, ConfirmText;
+    Auto, X, Y, Width, Height, Callback, Confirm, ConfirmText = ParseButtonArgs(X, Y, Width, Height, Callback);
 
     local Parent = self.Frame;
     if (Auto) then
-        Parent = self:_LayoutHolder(`LayoutButton_{Util.CleanName(Text)}`, Height or 20, 5);
+        Parent = self:_LayoutHolder(`LayoutButton_{Util.CleanName(Text)}`, Height or 24, 5);
         X      = X or 50;
         Y      = Y or 0;
         Width  = Width or 160;
-        Height = Height or 20;
+        Height = Height or 24;
     end
 
-    local Control = Util.MakeButtonControl(Parent, `Button_{Util.CleanName(Text)}`, UDim2FromOffset(X, Y), UDim2FromOffset(Width, Height or 20), 118);
-    Util.Label(Control, "Text", Text, UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), Theme.Text, Enum.TextXAlignment.Center, 120);
+    local Control = Util.MakeButtonControl(Parent, `Button_{Util.CleanName(Text)}`, UDim2FromOffset(X, Y), UDim2FromOffset(Width, Height or 24), 118);
+    local ButtonLabel = Util.Label(Control, "Text", Text, UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), Theme.Text, Enum.TextXAlignment.Center, 120);
 
     local ButtonObject = setmetatable({
         Instance = Control,
+        Label    = ButtonLabel,
+        Text     = Text,
         Callback = Callback,
+        Confirm  = Confirm == true,
+        ConfirmText = ConfirmText or "Are you sure?",
+        Confirming  = false,
     }, Button);
 
     local Hitbox = Util.Button(Control, "Hitbox", UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), "", 125);
@@ -692,6 +699,20 @@ function Groupbox:AddButton(Text, X, Y, Width, Height, Callback)
     self.Window:_Signal(Hitbox.InputBegan, function(Input)
         if (self.Window:_IsInputBlockedByPopup(Input)) then return; end
         if (Util.IsClickInput(Input)) then
+            if (ButtonObject.Confirm) and (not ButtonObject.Confirming) then
+                ButtonObject.Confirming = true;
+                ButtonObject.Label.Text = ButtonObject.ConfirmText;
+                task.delay(0.85, function()
+                    if (ButtonObject.Confirming) and (ButtonObject.Label) and (ButtonObject.Label.Parent) then
+                        ButtonObject.Confirming = false;
+                        ButtonObject.Label.Text = ButtonObject.Text;
+                    end
+                end)
+                return;
+            end
+
+            ButtonObject.Confirming = false;
+            ButtonObject.Label.Text = ButtonObject.Text;
             Util.SetControlState(Control, "pressed");
             ButtonObject:Press();
             task.delay(0.08, function()
@@ -719,7 +740,7 @@ local function ParseColorPickerArgs(Text, X, Y, Width, Default, Callback)
         Y        = Info.Y;
         Parent   = Info.Parent;
         Compact  = Info.Compact == true;
-        Width    = Info.Width or (Compact and 14 or 180);
+        Width    = Info.Width or (Compact and 15 or 180);
         Default  = Info.Default or Info.Value or Default or Theme.Accent;
         Callback = Info.Callback or Callback;
         Auto     = X == nil or Y == nil;
@@ -749,7 +770,7 @@ function Groupbox:AddColorPicker(Text, X, Y, Width, Default, Callback)
             Parent = PickerParent or self.LastAutoWrapper or self.Frame;
             X      = X or 214;
             Y      = Y or ((self.LastAutoRowOffset or 0) + 4);
-            Width  = Width or 14;
+            Width  = Width or 15;
         else
             Parent = self:_LayoutHolder(`LayoutColorPicker_{Util.CleanName(Text)}`, 16, 4);
             X      = X or 50;
@@ -760,8 +781,8 @@ function Groupbox:AddColorPicker(Text, X, Y, Width, Default, Callback)
 
     local SwatchWidth  = 14;
     local SwatchHeight = 7;
-    local HolderHeight = Compact and SwatchHeight or 16;
-    local Holder       = Util.Frame(Parent, `ColorPicker_{Util.CleanName(Text)}`, UDim2FromOffset(X, Y), UDim2FromOffset(Compact and SwatchWidth or Width, HolderHeight), Theme.Body, Compact and 126 or 118);
+    local HolderHeight = Compact and 9 or 16;
+    local Holder       = Util.Frame(Parent, `ColorPicker_{Util.CleanName(Text)}`, UDim2FromOffset(X, Y), UDim2FromOffset(Compact and 15 or Width, HolderHeight), Theme.Body, Compact and 126 or 118);
     Holder.BackgroundTransparency = 1;
 
     local Title;
@@ -774,60 +795,40 @@ function Groupbox:AddColorPicker(Text, X, Y, Width, Default, Callback)
     local SwatchGradient = Util.Gradient(Swatch, Default, Color3.new(Default.R * 0.65, Default.G * 0.65, Default.B * 0.65));
     Util.Stroke(Swatch, Theme.ColorPickerOuter, 1);
 
-    local PopupWidth   = 132;
-    local PickerPadding = 7;
-    local MapY         = PickerPadding;
-    local MapWidth     = PopupWidth - PickerPadding * 2;
-    local MapHeight    = 72;
-    local HueGap       = 6;
-    local HueBarHeight = 7;
-    local PopupHeight  = MapY + MapHeight + HueGap + HueBarHeight + PickerPadding;
+    local MapSize   = 185;
+    local PopupSize = MapSize + 2;
 
-    local Popup = Util.Frame(self.Window.PopupLayer, `ColorMenu_{Util.CleanName(Text)}`, UDim2FromOffset(0, 0), UDim2FromOffset(PopupWidth, PopupHeight), Theme.ColorPickerPopup, 540);
+    local Popup = Util.Frame(self.Window.PopupLayer, `ColorMenu_{Util.CleanName(Text)}`, UDim2FromOffset(0, 0), UDim2FromOffset(PopupSize, PopupSize), Theme.ColorPickerOuter, 540);
     Popup.Visible = false;
     Util.Stroke(Popup, Theme.ColorPickerPopupBorder, 1);
 
-    local PopupInner = Util.Frame(Popup, "Inner", UDim2FromOffset(1, 1), UDim2.new(1, -2, 1, -2), Theme.ColorPickerPopup, 541);
+    local Map = Util.Frame(Popup, "ColorMap", UDim2FromOffset(1, 1), UDim2FromOffset(MapSize, MapSize), Theme.White, 545);
+    Map.ClipsDescendants = true;
 
-    local Map = Util.Frame(PopupInner, "SatVal", UDim2FromOffset(PickerPadding, MapY), UDim2FromOffset(MapWidth, MapHeight), Color3FromHSV(0, 1, 1), 545);
-    Util.Stroke(Map, Color3FromRGB(16, 15, 20), 1);
+    for Index = 0, 5 do
+        local Segment = Util.Frame(Map, `Hue_{Index}`, UDim2.new(Index / 6, 0, 0, 0), UDim2.new(1 / 6, 1, 1, 0), Theme.White, 546);
+        Util.SideGradient(Segment, Color3FromHSV(Index / 6, 1, 1), Color3FromHSV((Index + 1) / 6, 1, 1));
+    end
 
-    local WhiteLayer   = Util.Frame(Map, "White", UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), Theme.White, 546);
+    local WhiteLayer   = Util.Frame(Map, "White", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0.5, 0), Theme.White, 547);
     local WhiteGradient = InstanceNew("UIGradient");
     WhiteGradient.Color        = ColorSequence.new(Theme.White, Theme.White);
     WhiteGradient.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1) });
-    WhiteGradient.Rotation     = 0;
+    WhiteGradient.Rotation     = 90;
     WhiteGradient.Parent       = WhiteLayer;
 
-    local BlackLayer   = Util.Frame(Map, "Black", UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), Color3.new(0, 0, 0), 547);
+    local BlackLayer   = Util.Frame(Map, "Black", UDim2.new(0, 0, 0.5, 0), UDim2.new(1, 0, 0.5, 0), Color3.new(0, 0, 0), 548);
     local BlackGradient = InstanceNew("UIGradient");
     BlackGradient.Color        = ColorSequence.new(Color3.new(0, 0, 0), Color3.new(0, 0, 0));
     BlackGradient.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(1, 0) });
     BlackGradient.Rotation     = 90;
     BlackGradient.Parent       = BlackLayer;
 
-    local Cursor = Util.Frame(Map, "Cursor", UDim2FromOffset(0, 0), UDim2FromOffset(6, 6), Theme.White, 550);
+    local Cursor = Util.Frame(Map, "Cursor", UDim2FromOffset(0, 0), UDim2FromOffset(4, 4), Color3.new(0, 0, 0), 550);
     Cursor.AnchorPoint = Vector2New(0.5, 0.5);
-    local CursorCorner = InstanceNew("UICorner");
-    CursorCorner.CornerRadius = UDim.new(1, 0);
-    CursorCorner.Parent       = Cursor;
-    Util.Stroke(Cursor, Color3FromRGB(0, 0, 0), 1);
+    Util.Frame(Cursor, "Inner", UDim2FromOffset(1, 1), UDim2FromOffset(2, 2), Theme.White, 551);
 
     local MapHitbox = Util.Button(Map, "Hitbox", UDim2FromOffset(0, 0), UDim2.new(1, 0, 1, 0), "", 552);
-
-    local HueBar = Util.Frame(PopupInner, "Hue", UDim2FromOffset(PickerPadding, MapY + MapHeight + HueGap), UDim2FromOffset(MapWidth, HueBarHeight), Theme.White, 545);
-    HueBar.ClipsDescendants = true;
-    Util.Stroke(HueBar, Color3FromRGB(16, 15, 20), 1);
-    for Index = 0, 5 do
-        local Segment = Util.Frame(HueBar, `Segment_{Index}`, UDim2.new(Index / 6, 0, 0, 0), UDim2.new(1 / 6, 1, 1, 0), Theme.White, 546);
-        Util.SideGradient(Segment, Color3FromHSV(Index / 6, 1, 1), Color3FromHSV((Index + 1) / 6, 1, 1));
-    end
-
-    local HueCursor = Util.Frame(HueBar, "Cursor", UDim2FromScale(0, 0.5), UDim2FromOffset(2, HueBarHeight + 2), Theme.White, 550);
-    HueCursor.AnchorPoint = Vector2New(0.5, 0.5);
-    Util.Stroke(HueCursor, Color3FromRGB(0, 0, 0), 1);
-
-    local HueHitbox = Util.Button(HueBar, "Hitbox", UDim2FromOffset(0, -4), UDim2.new(1, 0, 1, 8), "", 552);
 
     local PickerRow = Util.ResolvePickerRow(Parent);
 
@@ -844,17 +845,15 @@ function Groupbox:AddColorPicker(Text, X, Y, Width, Default, Callback)
         SwatchGradient = SwatchGradient,
         Popup          = Popup,
         Map            = Map,
+        MapSize        = MapSize,
         Cursor         = Cursor,
         Hue            = 0,
         Sat            = 0,
         Val            = 1,
-        HueTrack       = HueBar,
-        HueCursor      = HueCursor,
         Value          = Default,
         Callback       = Callback,
         Open           = false,
         DraggingMap    = false,
-        DraggingHue    = false,
     }, ColorPicker);
 
     ColorPickerObject:Set(Default, true);
@@ -872,23 +871,14 @@ function Groupbox:AddColorPicker(Text, X, Y, Width, Default, Callback)
         end
     end)
 
-    self.Window:_Signal(HueHitbox.InputBegan, function(Input)
-        if (Util.IsDragInput(Input)) then
-            ColorPickerObject.DraggingHue = true;
-            ColorPickerObject:_SetHueFromInput(Input);
-        end
-    end)
-
     self.Window:_Signal(UserInputService.InputChanged, function(Input)
         if (not Util.IsMoveInput(Input)) then return; end
-        if (ColorPickerObject.DraggingMap) then ColorPickerObject:_SetMapFromInput(Input);
-        elseif (ColorPickerObject.DraggingHue) then ColorPickerObject:_SetHueFromInput(Input); end
+        if (ColorPickerObject.DraggingMap) then ColorPickerObject:_SetMapFromInput(Input); end
     end)
 
     self.Window:_Signal(UserInputService.InputEnded, function(Input)
         if (Util.IsDragInput(Input)) then
             ColorPickerObject.DraggingMap = false;
-            ColorPickerObject.DraggingHue = false;
         end
     end)
 
@@ -918,9 +908,13 @@ function ColorPicker:_Display(Fire)
     self.Value                  = Color3FromHSV(self.Hue, self.Sat, self.Val);
     self.Swatch.BackgroundColor3 = self.Value;
     self.SwatchGradient.Color   = ColorSequence.new(self.Value, Color3.new(self.Value.R * 0.65, self.Value.G * 0.65, self.Value.B * 0.65));
-    self.Map.BackgroundColor3   = Color3FromHSV(self.Hue, 1, 1);
-    self.Cursor.Position        = UDim2FromScale(self.Sat, 1 - self.Val);
-    self.HueCursor.Position     = UDim2FromScale(self.Hue, 0.5);
+
+    local CursorY = 1 - (self.Val * 0.5);
+    if (self.Val >= 0.999) and (self.Sat < 0.999) then
+        CursorY = self.Sat * 0.5;
+    end
+
+    self.Cursor.Position = UDim2FromScale(self.Hue, MathClamp(CursorY, 0, 1));
 
     if (Fire) then
         Util.SafeCallback(self.Callback, self.Value);
@@ -932,15 +926,20 @@ function ColorPicker:_SetMapFromInput(Input)
     if (self.Map.AbsoluteSize.X <= 0) or (self.Map.AbsoluteSize.Y <= 0) then return; end
     local LocalX = MathClamp(Input.Position.X - self.Map.AbsolutePosition.X, 0, self.Map.AbsoluteSize.X);
     local LocalY = MathClamp(Input.Position.Y - self.Map.AbsolutePosition.Y, 0, self.Map.AbsoluteSize.Y);
-    self.Sat = LocalX / self.Map.AbsoluteSize.X;
-    self.Val = 1 - (LocalY / self.Map.AbsoluteSize.Y);
-    self:_Display(true);
-end
 
-function ColorPicker:_SetHueFromInput(Input)
-    if (self.HueTrack.AbsoluteSize.X <= 0) then return; end
-    local LocalX = MathClamp(Input.Position.X - self.HueTrack.AbsolutePosition.X, 0, self.HueTrack.AbsoluteSize.X);
-    self.Hue = LocalX / self.HueTrack.AbsoluteSize.X;
+    local XRatio = LocalX / self.Map.AbsoluteSize.X;
+    local YRatio = MathClamp(LocalY / self.Map.AbsoluteSize.Y, 0, 1);
+
+    self.Hue = XRatio;
+
+    if (YRatio <= 0.5) then
+        self.Sat = YRatio / 0.5;
+        self.Val = 1;
+    else
+        self.Sat = MathClamp(0.5 / YRatio, 0, 1);
+        self.Val = MathClamp((1 - YRatio) / YRatio, 0, 1);
+    end
+
     self:_Display(true);
 end
 
@@ -951,14 +950,13 @@ function ColorPicker:SetOpen(Open, Silent)
         self.Window:_CloseColorPickers(self);
         self.Window.OpenColorPicker = self;
         self.Popup.Visible = true;
-        Util.PositionPopup(self.Window, self.Popup, self.Swatch, 2);
+        Util.PositionPopup(self.Window, self.Popup, self.Swatch, 3);
     elseif (self.Window.OpenColorPicker == self) then
         self.Window.OpenColorPicker = nil;
     end
 
-    if (not Open) and (self.DraggingMap or self.DraggingHue) then
+    if (not Open) and (self.DraggingMap) then
         self.DraggingMap = false;
-        self.DraggingHue = false;
     end
 
     self.Open          = Open;

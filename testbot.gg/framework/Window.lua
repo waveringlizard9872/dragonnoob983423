@@ -299,24 +299,20 @@ function Library.new(Options)
     Util.Stroke(Body, Color3FromRGB(15, 14, 19), 1);
 
     local FramePadding = 12;
-    local HeaderHeight  = 25;
     local TabHeight    = Layout.TabBarHeight;
 
-    local DragHeader = Util.Button(Body, "DragHeader", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, HeaderHeight), "", 104);
+    local DragHeader = Util.Button(Body, "DragHeader", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, FramePadding), "", 104);
     DragHeader.BackgroundTransparency = 1;
 
     Util.Line(Body, "TopAccent", UDim2FromOffset(1, 0), UDim2.new(1, -2, 0, 1), Theme.Accent, 105);
 
-    local TitleLabel = Util.Label(Body, "Title", Options.Title or "Kyanite", UDim2FromOffset(5, 4), UDim2.new(1, -10, 0, 14), Theme.Text, Enum.TextXAlignment.Left, 106);
-    Util.ApplyFont(TitleLabel, Layout.TextSize, false);
-
-    local TabBar = Util.Frame(Body, "TabBar", UDim2FromOffset(FramePadding - 1, HeaderHeight), UDim2.new(1, -(FramePadding * 2) + 2, 0, TabHeight), Theme.Tab, 105);
+    local TabBar = Util.Frame(Body, "TabBar", UDim2FromOffset(FramePadding - 1, FramePadding), UDim2.new(1, -(FramePadding * 2) + 2, 0, TabHeight), Theme.Tab, 105);
     Util.Line(TabBar, "TopOutline",    UDim2FromOffset(0, 0),       UDim2.new(1, 0, 0, 1),  Theme.TabOutline, 130);
     Util.Line(TabBar, "LeftOutline",   UDim2FromOffset(0, 0),       UDim2.new(0, 1, 1, 0),  Theme.TabOutline, 130);
     Util.Line(TabBar, "RightOutline",  UDim2.new(1, -1, 0, 0),      UDim2.new(0, 1, 1, 0),  Theme.TabOutline, 130);
     Util.Line(TabBar, "BottomOutline", UDim2.new(0, 0, 1, -1),      UDim2.new(1, 0, 0, 1),  Theme.TabOutline, 130);
 
-    local Content      = Util.Frame(Body, "Content", UDim2FromOffset(FramePadding, HeaderHeight + TabHeight), UDim2.new(1, -FramePadding * 2, 1, -(FramePadding + HeaderHeight + TabHeight)), Theme.Workspace, 105);
+    local Content      = Util.Frame(Body, "Content", UDim2FromOffset(FramePadding, FramePadding + TabHeight), UDim2.new(1, -FramePadding * 2, 1, -(FramePadding * 2 + TabHeight)), Theme.Workspace, 105);
     Util.Stroke(Content, Theme.WorkspaceBorder, 1);
 
     local ContentInner = Util.Frame(Content, "InnerShade", UDim2FromOffset(1, 1), UDim2.new(1, -2, 1, -2), Theme.Workspace, 106);
@@ -340,7 +336,6 @@ function Library.new(Options)
         Gui              = ScreenGui,
         Root             = Root,
         Body             = Body,
-        TitleLabel       = TitleLabel,
         TabBar           = TabBar,
         Content          = ContentInner,
         PopupLayer       = PopupLayer,

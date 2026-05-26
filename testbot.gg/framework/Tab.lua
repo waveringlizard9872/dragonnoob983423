@@ -44,7 +44,7 @@ function Tab:_RelayoutGroupboxes()
     for _, GroupboxObject in self.Groupboxes do
         if (not GroupboxObject.Auto) then continue; end
 
-        local Height = MathMax(145, GroupboxObject._AutoHeight or GroupboxObject.Frame.Size.Y.Offset);
+        local Height = MathMax(GroupboxObject.MinHeight or 0, GroupboxObject._AutoHeight or GroupboxObject.Frame.Size.Y.Offset);
         local Side   = GroupboxObject.Side;
 
         if (not Side) or (Side == "auto") then
@@ -58,18 +58,6 @@ function Tab:_RelayoutGroupboxes()
             TableInsert(LeftEntries, { Groupbox = GroupboxObject, Height = Height });
             LeftHeight = LeftHeight + Height + Layout.GroupboxGap;
         end
-    end
-
-    if (#LeftEntries == 1) then
-        local ColumnHeight = MathMax(145, self.LeftSide.AbsoluteSize.Y - Layout.ColumnTitleOverhang);
-        LeftEntries[1].Height = MathMin(LeftEntries[1].Height, ColumnHeight);
-        LeftEntries[1].Height = MathMax(LeftEntries[1].Height, ColumnHeight);
-    end
-
-    if (#RightEntries == 1) then
-        local ColumnHeight = MathMax(145, self.RightSide.AbsoluteSize.Y - Layout.ColumnTitleOverhang);
-        RightEntries[1].Height = MathMin(RightEntries[1].Height, ColumnHeight);
-        RightEntries[1].Height = MathMax(RightEntries[1].Height, ColumnHeight);
     end
 
     local function SetColumnScroll(Column, EntryCount)
@@ -124,7 +112,7 @@ function Tab:AddGroupbox(Title, Position, Size)
     local Auto  = not Util.IsUDim2(Position);
     local Side  = "auto";
     local Width = 260;
-    local Height = 145;
+    local Height = Auto and 0 or 145;
 
     if (Auto) then
         if (type(Position) == "table") then
@@ -198,7 +186,7 @@ function Tab:AddGroupbox(Title, Position, Size)
     ContentFrame.BackgroundTransparency = 1;
     local ContentLayout = Util.ListLayout(ContentFrame, 0);
 
-    local TopPad = Util.Frame(ContentFrame, "TopPad", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, 4), Theme.Groupbox, Layout.GroupboxContentZ);
+    local TopPad = Util.Frame(ContentFrame, "TopPad", UDim2FromOffset(0, 0), UDim2.new(1, 0, 0, 5), Theme.Groupbox, Layout.GroupboxContentZ);
     TopPad.BackgroundTransparency = 1;
     TopPad.LayoutOrder            = -999;
 
@@ -213,6 +201,7 @@ function Tab:AddGroupbox(Title, Position, Size)
         Auto              = Auto,
         Side              = Side,
         Width             = Width,
+        MinHeight         = Height,
         LastElementType   = nil,
         LastAutoWrapper   = nil,
         LastAutoRowOffset = 0,
@@ -310,12 +299,13 @@ function Tab:AddConfigSystem()
 
     local function Refresh() ConfigList:Refresh(); end
 
-    local function AddConfigButton(Label, Callback)
+    local function AddConfigButton(Label, Callback, Confirm)
         Configurations:AddButton(Label, {
             X        = ConfigInset,
             Width    = ConfigWidth,
             Height   = 20,
             Callback = Callback,
+            Confirm  = Confirm == true,
         });
     end
 
@@ -378,7 +368,7 @@ function Tab:AddConfigSystem()
             ConfigList:Set(Name, true);
             Notify(`Reset config "{Name}".`);
         end
-    end)
+    end, true)
 
     AddConfigButton("Delete", function()
         local Name = SelectedConfig or NameBox:Get();
@@ -392,7 +382,7 @@ function Tab:AddConfigSystem()
             Refresh();
             Notify(`Deleted config "{Name}".`);
         end
-    end)
+    end, true)
 
     AddConfigButton("Set as Autoload", function()
         local Name = NameBox:Get() or SelectedConfig;
@@ -436,6 +426,7 @@ function Tab:AddConfigSystem()
         X        = ConfigInset,
         Width    = ConfigWidth,
         Height   = 20,
+        Confirm  = true,
         Callback = function()
             self.Window:Destroy();
         end,
